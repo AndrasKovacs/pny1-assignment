@@ -17,23 +17,53 @@ In a nutshell, type classes enable automatic code generation by constrained sear
 
 ```haskell
 data A a
-data B a
-f :: forall a. (a -> String) -> A a -> String
-g :: forall a. B a -> A a 
+data B
+f :: B -> String
+g :: forall a. (a -> String) -> A a -> String
 ```
 
 We would like to implement a function of the following type:
 
 ```haskell
-h :: forall a. (a -> String) -> B a -> String
+h :: A B -> String
 ```
 
-A solution would be `h show_a ba = show_a (g ba)`. We can arrive at the solution by searching the available definitions in the context and trying to plug them together in a way that results in the desired type. This programming activity is analoguous to formal proof writing as per the Curry-Howard correspondence. A large part of practical programming can be understood as a task like the above: given a context of already implemented code, write additional code with given type and semantics. Note that our toy example is solvable purely by playing with types, but given some formal notion of semantics "search" can encompass that as well. 
+A natural solution would be `h ab = g f ab`. We can arrive at the solution by searching the available definitions in the context and trying to plug them together in a way that results in the desired type. This activity is analoguous to formal proof writing as per the Curry-Howard correspondence. A large part of practical programming can be understood as a task like the above: given a context of already implemented code, write additional code with given type and semantics. Note that our toy example is solvable purely by playing with types, but given some formal notion of semantics "search" can encompass that as well. 
 
-Automatic search techniques do exist, but they are largely unusable for everyday programming because of the necessity of painstaking formal sepcification of search goals and the combinatorial explosion of problems. Type classes mitigate both problems by *constraining* search.
+Automatic search techniques do exist, but they are largely unusable for everyday programming because of the following reasons:
 
+- The necessity of painstaking formal specification of search goals. If our specification isn't precise enough, then it's not guaranteed that search results will be satisfactory. 
+- Search spaces are prohibitively large for all but the simplest problems. 
 
+Type classes mitigate both problems by *constraining* search. We can reframe our toy problem with type classes:
 
+```haskell
+-- definitions as before
+data A a
+data B
+f :: B -> String
+g :: forall a. (a -> String) -> A a -> String
+
+class Show a where
+  show :: a -> String
+
+instance Show B where
+  show = f
+  
+instance Show a => Show (A a) where
+  show = g show
+  
+h :: A B -> String
+h = show
+```
+
+In the example above, we have merely written `h = show` instead of the more detailed `h = g f` definition. We employed automatic search by invoking the `show` class method. Our Haskell compiler performed roughly the following steps:
+
+1. Try to prove `Show (A B)`
+2. Find `instance Show a => Show (A a)` as a matching instance.
+3. Unify `A B` with `A a`, instantiating `a` to `B`. 
+4. Try to prove `Show B` (the instantiated constraint on the `Show (A B)` instance).
+5. Find `instance Show B` as a matching instance. 
 
 
 
