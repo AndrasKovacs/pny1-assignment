@@ -14,9 +14,11 @@ Below I discuss the merits and prospects of type classes, with focus on advanced
 
 #### 2. About type classes
 
+##### 2.1. Overview
+
 Type classes were originally invented (wadler 88, wiki) as a principled and efficiently implementable form of ad-hoc polymorphism. However, with the benefit of hindsight I shall emphasize a different aspect in my own short definition:
 
-> **Type classes are systems enabling automatic code generation through constrained proof search**
+> **Type classes are systems enabling automatic code generation through constrained search.**
 
 What do we mean by "constrained" and "search" here, though? The illuminate this, let us first consider a general unconstrained search problem, as a simple Haskell programming task. Suppose our context has the following data and function definitions (with implementations that aren't relevant to us now):
 
@@ -70,25 +72,80 @@ In the example above, we have merely written `h = show` instead of the more deta
 4. Try to prove `Show B` (the instantiated constraint on the `Show (A B)` instance).
 5. Find `instance Show B` as a matching instance. 
 
-A succesful search allows the compiler to plug in the appropriate `show` definitions, thereby producing a "proof". In fact, the above procedure is just a simple form of resolution, similar to that used in logic programming. 
+A succesful search allows the compiler to plug in the appropriate `show` definitions, thereby producing a "proof". In fact, the above procedure is just a simple form of resolution, similar to that used in logic programming.
 
-As long as instance and class definitions are kept in a tractable  form (in Haskell's case, instances are Horn clauses), instance resolution remains a tractable problem. This constitutes a solution to the first problem, the problem of large search spaces. 
+As long as instance and class definitions are kept in a tractable form (in Haskell's case, instances are Horn clauses), instance resolution remains a tractable problem. This constitutes a solution to the first problem, the problem of large search spaces. (TODO: other possible ways to constrain search? I don't know examples for algo-s fundamentally different from resolution). 
 
-As to the problem of specifications, programmers can manually implement instance methods, thereby exerting control over the semantics of generated code. Instances become the basic building blocks, and instance resolution only provides the "plumbing". Of course, this means that a significant amount of program logic is still written by hand. It's a general trade-off; depdending on the expressiveness of the ambient type system programmers may be able to increase or decrease the amount of manual code obligations. 
+As to the problem of specifications, programmers can manually implement instance methods, thereby exerting control over the semantics of generated code. Instances become the basic building blocks, and instance resolution only provides the "plumbing". Of course, this means that a significant amount of program logic is still written by hand. It's a general trade-off; depdending on the expressiveness of the ambient type system programmers may be able to increase or decrease the amount of code obligations. 
+
+##### 2.2. Advantages of type classes
+
+  - Types carry information. By inspecting the structure of types we get a lot of information, and type classes allow us to *act* on that information. It also allows us to make our data types as lean and general as possible ("dumb reusable data"), and implement Prolog "rule" instances instead of "fact" instances. Type classes operate over a potentially infinite term language of type constructors (example: Show (a, b), Show ((a, b), (c, d)) etc.). 
+  - Class methods can be dispatched statically in the vast majority of cases. Rust only uses static dispatch. The compiler has great freedom to dispatch statically or dinamically as it sees fit. The programmer can precisely introduce dynamic dispatch via existentially boxed instances and higher-order functions. 
+  - Proven abstractions from algebra and category theory relatively well expressible with type classes. 
+  - Contrast OOP abstraction: its primary job is *enforcing* structural and nominal relations. OOP doesn't generate code; we can either inherit existing code or override it. Class hierarchies are glued together nominally, and just sort of sit there. Example: inability in Java or Eiffel to have a generic pair type that's Eq iff the two fields are Eq. Abstraction by polymorphism involves lots of virtual calls, Java has to rely on JIT to devirtualize. Type classes are closer to actual programming problems ("given context of code implement some other code" versus "let's try to come up with a bunch of complicated structural relations between objects that gives us maximal code reuse by inclusion"). 
+
+##### 2.3. Coherent versus incoherent classes 
+
+- What do they mean
+- Advantages of coherence (robustness, definitional instance equality, entailment as logic)
+- Advantages of incoherence (first-class dictionaries, backtracking, overlapping)
+- Examples and anecdotes
+- coherence in programming languages vs coherence in proof assistants
+- We'll consider coherence as important point later in dep types. 
+
+#### Back a bit to code gen
+
+- Code /= program. There is a mapping from code to program ("elaboration"). 
+- The compiler fills in details that follow from the semantics expressed in the source code.
+- The mapping should be easy to reason about.
+- There should be no arbitrary choices and choices that depend on source code non-compositionally
+
+- Types of program inference:
+   - as extension of type inference: based on type dependencies. Completely unambiguous.
+   - Proof search: based on searching contexts. Instance resolution a special case.
+
+- When is it safe to do arbitrary search? Irrelevant (propositional types)
+   - We can throw anything at irrelevant types. SMT is nice. 
+   
+#### Throw dep types and first-class modules in
+
+- Are classes still needed? 
+    - at least *some* mechanism that emulates math's "convention of notation" should be available
+    - first class modules as alternative
+    - generic prog as alternative
+- What about coherence:
+    - Problem: undecidable propositional apartness!
+        - solutions:
+          - proof obligations of apartness (I sort of like it)
+          - restriction of language fragment in instance heads  (like current GHC)
+          - restriction of usage of instances
+    - more problems: univalent / observational type theories
+    - How to provide internal proof of coherence?
+       - I have no idea. Need some simple Agda model. 
+- Instead of coherence
+    - Use propositional classes
+        - technique: refine classes until they are propositional 
+           - example: Eq vs DecEq
+              - but what bout bigger eqv. relations for Eq instance?
+                 - just use (higher inductive) quotient newtypes, lol
+    - encode relevant info in types, make coherence redundant
+      - but what about Monad, Traversable etc? Don't want to suddenly traverse backwards
+      - It's very complicated to encode traversal order, plus it screws up all existing infrastructure
+    - What solutions are there that forgo coherence but still provide enough reliability?
+      - some kind of local instance scoping? But we could do first class module opening instead.
+         
+    
+    
+   
 
 
 
 
-- What they are
-- Why do I think they are good, in what ways
-   - OOP types: enforce static relations, dep types: act on information carried by types 
-   - most programming tasks are implications in the BHK sense: given a context of code,
-     can we implement some other code? OOP doesn't help in that; inherited code is
-     either already written, or must be reimplemented each time if it's virtual. 
-   - but: if there is information encoded in the structure of types, we should find ways
-       to actually make use of it. 
-   -  most generally: large elimination on type universes
-   -  usefully approximated by structural recursion on term language of type constructors
+
+
+
+
    
 - Different flavors
   - coherent/non-coherent
@@ -97,7 +154,7 @@ As to the problem of specifications, programmers can manually implement instance
     - plz discuss only the important core features
     
 
-##### 3. Interlude: 
+##### 3. More generally on code generation: 
   - methods of code generation: 
       - program inference
       - proofs search: ad-hoc, instance-guided
