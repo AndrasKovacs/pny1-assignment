@@ -78,6 +78,9 @@ As long as instance and class definitions are kept in a tractable form (in Haske
 
 As to the problem of specifications, programmers can manually implement instance methods, thereby exerting control over the semantics of generated code. Instances become the basic building blocks, and instance resolution only provides the "plumbing". Of course, this means that a significant amount of program logic is still written by hand. It's a general trade-off; depdending on the expressiveness of the ambient type system programmers may be able to increase or decrease the amount of code obligations. 
 
+---- todo
+
+
 ##### 2.2. Advantages of type classes
 
   - Types carry information. By inspecting the structure of types we get a lot of information, and type classes allow us to *act* on that information. It also allows us to make our data types as lean and general as possible ("dumb reusable data"), and implement Prolog "rule" instances instead of "fact" instances. Type classes operate over a potentially infinite term language of type constructors (example: Show (a, b), Show ((a, b), (c, d)) etc.). 
