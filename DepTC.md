@@ -11,7 +11,33 @@ There are also unsolved questions regarding the implementation of type classes i
 
 Below I discuss the merits and prospects of type classes, with focus on advanced future languages. I try to adopt a general perspective, from which type classes can be viewed as a particular method of program inference and synthesis. 
 
-##### 2. What are type classes anyway?
+##### 2. What are type classes?
+
+In a nutshell, type classes enable automatic code generation by constrained search. What do we mean by "constrained" and "search" here, though? The illuminate this, let us first consider a general unconstrained search problem, as a simple Haskell programming task. Suppose our context has the following data and function definitions (with implementations that aren't relevant to us now):
+
+```haskell
+data A a
+data B a
+f :: forall a. (a -> String) -> A a -> String
+g :: forall a. B a -> A a 
+```
+
+We would like to implement a function of the following type:
+
+```haskell
+h :: forall a. (a -> String) -> B a -> String
+```
+
+A solution would be `h show_a ba = show_a (g ba)`. We can arrive at the solution by searching the available definitions in the context and trying to plug them together in a way that results in the desired type. This programming activity is analoguous to formal proof writing as per the Curry-Howard correspondence. A large part of practical programming can be understood as a task like the above: given a context of already implemented code, write additional code with given type and semantics. Note that our toy example is solvable purely by playing with types, but given some formal notion of semantics "search" can encompass that as well. 
+
+Automatic search techniques do exist, but they are largely unusable for everyday programming because of the necessity of painstaking formal sepcification of search goals and the combinatorial explosion of problems. Type classes mitigate both problems by *constraining* search.
+
+
+
+
+
+
+
 - What they are
 - Why do I think they are good, in what ways
    - OOP types: enforce static relations, dep types: act on information carried by types 
