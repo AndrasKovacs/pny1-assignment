@@ -1,7 +1,8 @@
 
-#### The future of type classes in (dependently typed) programming
+### The future of type classes in (dependently typed) programming
 
-##### 1. Introduction
+
+#### 1. Introduction
 
 Type classes are on the rise. Major modern programming languages such as Scala, Rust and Swift support type class-based abstraction. Microsoft Research's new theorem prover, Lean was designed from ground-up with type classes in mind, and Agda and Coq, two existing proof assistants, have also added support. The C++17 standard will hopefully also add type classes under the name of "Concept"-s, after much languishing and delays. 
 
@@ -11,9 +12,13 @@ There are also unsolved questions regarding the implementation of type classes i
 
 Below I discuss the merits and prospects of type classes, with focus on advanced future languages. I try to adopt a general perspective, from which type classes can be viewed as a particular method of program inference and synthesis. 
 
-##### 2. What are type classes?
+#### 2. About type classes
 
-In a nutshell, type classes enable automatic code generation by constrained search. What do we mean by "constrained" and "search" here, though? The illuminate this, let us first consider a general unconstrained search problem, as a simple Haskell programming task. Suppose our context has the following data and function definitions (with implementations that aren't relevant to us now):
+Type classes were originally invented (wadler 88, wiki) as a principled and efficiently implementable form of ad-hoc polymorphism. However, with the benefit of hindsight I shall emphasize a different aspect in my own short definition:
+
+> **Type classes are systems enabling automatic code generation through constrained proof search**
+
+What do we mean by "constrained" and "search" here, though? The illuminate this, let us first consider a general unconstrained search problem, as a simple Haskell programming task. Suppose our context has the following data and function definitions (with implementations that aren't relevant to us now):
 
 ```haskell
 data A a
@@ -64,6 +69,12 @@ In the example above, we have merely written `h = show` instead of the more deta
 3. Unify `A B` with `A a`, instantiating `a` to `B`. 
 4. Try to prove `Show B` (the instantiated constraint on the `Show (A B)` instance).
 5. Find `instance Show B` as a matching instance. 
+
+A succesful search allows the compiler to plug in the appropriate `show` definitions, thereby producing a "proof". In fact, the above procedure is just a simple form of resolution, similar to that used in logic programming. 
+
+As long as instance and class definitions are kept in a tractable  form (in Haskell's case, instances are Horn clauses), instance resolution remains a tractable problem. This constitutes a solution to the first problem, the problem of large search spaces. 
+
+As to the problem of specifications, programmers can manually implement instance methods, thereby exerting control over the semantics of generated code. Instances become the basic building blocks, and instance resolution only provides the "plumbing". Of course, this means that a significant amount of program logic is still written by hand. It's a general trade-off; depdending on the expressiveness of the ambient type system programmers may be able to increase or decrease the amount of manual code obligations. 
 
 
 
