@@ -16,7 +16,7 @@ Below I discuss the merits and prospects of type classes, with focus on advanced
 
 ##### 2.1. Overview
 
-Type classes were originally invented (wadler 88, wiki) as a principled and efficiently implementable form of ad-hoc polymorphism. However, with the benefit of hindsight I shall emphasize a different aspect in my own short definition:
+Type classes were originally invented (wadler 88, wiki) as a principled and efficiently implementable form of ad-hoc polymorphism. I do not aim to provide an introduction to type classes in this article; I assume that the reader is already familiar with them. Instead I seek to conceptualize them in a slightly unusual way. Thus, my short definition has a different emphasis than ad-hoc polymorphism: 
 
 > **Type classes are systems enabling automatic code generation through constrained search.**
 
@@ -123,13 +123,15 @@ class Pair<A extends Eq<A>, B extends Eq<B>> implements Eq<Pair<A, B>> {
 
 But this largely defeats the purpose, since now `Pair` itself is restricted to `Eq` fields. It's still true in Java and Eiffel that there is a straightforward `eq` method implementation for `Pair` whenever the fields also implement `eq`, but that implementation must be written out each time, or abstracted as a higher-order function with `Comparator` objects, which also requires manual plumbing on use sites. 
 
-Type classes essentially enable recursion on the structure of types, making choices based on specific subtypes. Note though that types classes are not the only way to achieve this, and there are theoretically more straithforward ways, which we'll explore in chapter (TODO chapter num). 
+Type classes enable recursion on the structure of types, making choices based on specific subtypes. Note though that types classes are not the only way to achieve this, and there are theoretically more straigthforward ways, which we'll explore in chapter (TODO chapter num). 
 
 > Side rant on informative types
 
 > Should types expose information, or instead hide unnecessary details? In the brave new world of (dependent) type-theory-based programming my choice shall be firmly the former option. Information hiding only makes sense in a dangerous world where programmers communicate intent by giving classes descriptive English names and preventing (with more or less success) breaking invariants by making method private. `MouseEventAdapter` is in the eye of the beholder. Its meaning is hinted at by its name, and defined by the implementation. Its productive use hinges on mutual understanding of programming patterns. 
 
 > But if types carry more information, they can be more useful, and we can also prove and enforce more properties. `Pair` is more informative than `PairOfInt`, and in turn least fixed points of functors are more informative than plain recursive data types. In the brave new world, we could have analogues of `MouseEventAdapter` types that encode their meaning in their structure, and invariants could be preserved by making illegal states unrepresentable. In that world, the name `MousEventAdapter` could be still useful as a shorthand, and we could still present lean API-s, but there wouldn't be nearly as much reason to hide details. After all, those with a clean record shouldn't have anything to fear, right?
+
+On another note, type classes also have a favorable weight-to-ratio in terms of runtime performance. The Rust programming language extensively uses type classes, but there is no runtime cost to them at all, since the relatively simple Rust type system (no higher-rank polymorphism, no polymorphic recursion) allows compile time specialization and inlining of all instances. Inlining and specialization can cause excessive code size though, which should be considered. The point is that type classes give compilers considerable freedom to specialize or not specialize as they see fit.  
 
 --------------------------------
 
