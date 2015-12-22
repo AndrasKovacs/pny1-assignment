@@ -64,7 +64,7 @@ h :: A B -> String
 h = show
 ```
 
-In the example above, we have merely written `h = show` instead of the more detailed `h = g f` definition. We employed automatic search by invoking the `show` class method. Our Haskell compiler performed roughly the following steps:
+In the example above, we have merely written `h = show` instead of the more fine-grained `h = g f` definition. We employed automatic search by invoking the `show` class method. Our Haskell compiler performed roughly the following steps:
 
 1. Try to prove `Show (A B)`
 2. Find `instance Show a => Show (A a)` as a matching instance.
@@ -125,15 +125,55 @@ But this largely defeats the purpose, since now `Pair` itself is restricted to `
 
 Type classes enable recursion on the structure of types, making choices based on specific subtypes. Note though that types classes are not the only way to achieve this, and there are theoretically more straigthforward ways, which we'll explore in chapter (TODO chapter num). 
 
-> Side rant on informative types
-
 > Should types expose information, or instead hide unnecessary details? In the brave new world of (dependent) type-theory-based programming my choice shall be firmly the former option. Information hiding only makes sense in a dangerous world where programmers communicate intent by giving classes descriptive English names and preventing (with more or less success) breaking invariants by making method private. `MouseEventAdapter` is in the eye of the beholder. Its meaning is hinted at by its name, and defined by the implementation. Its productive use hinges on mutual understanding of programming patterns. 
 
 > But if types carry more information, they can be more useful, and we can also prove and enforce more properties. `Pair` is more informative than `PairOfInt`, and in turn least fixed points of functors are more informative than plain recursive data types. In the brave new world, we could have analogues of `MouseEventAdapter` types that encode their meaning in their structure, and invariants could be preserved by making illegal states unrepresentable. In that world, the name `MousEventAdapter` could be still useful as a shorthand, and we could still present lean API-s, but there wouldn't be nearly as much reason to hide details. After all, those with a clean record shouldn't have anything to fear, right?
 
-On another note, type classes also have a favorable weight-to-ratio in terms of runtime performance. The Rust programming language extensively uses type classes, but without any runtime cost, since the relatively simple Rust type system (no higher-rank polymorphism, no polymorphic recursion) allows compile time specialization and inlining of all instances. Inlining and specialization can cause excessive code size though, which should be considered. The point is that type classes give compilers considerable freedom to specialize as they see fit. This compares favorably to OOP polymorphism, where devirtualization can't be performed as robustly or universally. Generally, more information in static types helps code optimization as well. 
+On another note, type classes also have a favorable weight-to-power ratio in terms of runtime performance. The Rust programming language extensively uses type classes, but without any runtime cost, since the relatively simple Rust type system (no higher-rank polymorphism, no polymorphic recursion) allows compile time specialization and inlining of all instances. Inlining and specialization can cause excessive code size though, which should be considered. The point is that type classes give compilers considerable freedom to specialize as they see fit. This compares favorably to OOP polymorphism, where devirtualization can't be performed as robustly or universally, or it requires runtime JIT assistance, as in the case of Java. Generally, more information in static types helps code optimization as well. 
 
 > Current dependently typed languages tend to have an *excess* of static information that is largely ignored by backends, because there hasn't been yet relevant research in this area, or there hasn't been need for that much performance.
+
+##### 2.4 Coherent and incoherent type classes
+
+Let's start off by defining coherence:
+
+> **An implementation of type classes is coherent if all instances with equal types are equal.**
+
+Runtime, instances are just records of values and functions, similar to virtual tables in C++ (supposed that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
+
+```haskell
+f :: Eq a => a -> a -> a -> a
+f a b default = if a == b then a else default
+```
+
+This is desuraged roughly into the following code in GHC's internal representation:
+
+```haskell
+f :: Eq a -> a -> a -> a -> a
+f eqA a b default = if ((==) eqA a b) then a else default
+```
+
+where `(==) eqA` looks up the `==` method from the `eqA` instance. Also, instances can be put into runtime boxes:
+
+```haskell
+data ShowBox a where
+  Box :: Show a => ShowBox
+```
+
+`Box` holds a dynamic `Show a` instance, and we can write code that releases the instance into the outer scope by pattern matching on the box:
+
+```haskell
+applyBox :: ShowBox a -> a -> String
+applyBox Box a = show a
+```
+
+Here, we were able to use the `show` method because by "opening" the box we made the `Show` instance available. 
+
+
+
+
+The type is desugared into `Eq a -> a -> a -> a -> a` in GHC's intermediate representation. 
+
 
 --------------------------------
 
