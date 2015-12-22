@@ -64,7 +64,7 @@ h :: A B -> String
 h = show
 ```
 
-> ** In the instance declaration `instance Show a => Show (A a) where ...`, we call `(A a)` the instance head and `Show a` the instance constraint. **
+> *In the instance declaration `instance Show a => Show (A a) where ...`, we call `(A a)` the instance head and `Show a` the instance constraint.*
 
 In the example above, we have merely written `h = show` instead of the more fine-grained `h = g f` definition. We employed automatic search by invoking the `show` class method. Our Haskell compiler performed roughly the following steps:
 
@@ -131,11 +131,11 @@ Type classes enable recursion on the structure of types, making choices based on
 
 > But if types carry more information, they can be more useful, and we can also prove and enforce more properties. `Pair` is more informative than `PairOfInt`, and in turn least fixed points of functors are more informative than plain recursive data types. In the brave new world, we could have analogues of `MouseEventAdapter` types that encode their meaning in their structure, and invariants could be preserved by making illegal states unrepresentable. In that world, the name `MousEventAdapter` could be still useful as a shorthand, and we could still present lean API-s, but there wouldn't be nearly as much reason to hide details. After all, those with a clean record shouldn't have anything to fear, right?
 
-On another note, type classes also have a favorable weight-to-power ratio in terms of runtime performance. The Rust programming language extensively uses type classes, but without any runtime cost, since the relatively simple Rust type system (no higher-rank polymorphism, no polymorphic recursion) allows compile time specialization and inlining of all instances. Inlining and specialization can cause excessive code size though, which should be considered. The point is that type classes give compilers considerable freedom to specialize as they see fit. This compares favorably to OOP polymorphism, where devirtualization can't be performed as robustly or universally, or it requires runtime JIT assistance, as in the case of Java. Generally, more information in static types helps code optimization as well. 
+On another note, type classes also have a favorable weight-to-power ratio in terms of runtime performance. The Rust programming language extensively uses type classes, but without any runtime cost, since the relatively simple Rust type system (no higher-rank polymorphism, no polymorphic values inside data types) allows compile-time specialization and inlining of all instances. Inlining and specialization can cause excessive code size though, which should be considered as a trade-off, but type classes give compilers considerable freedom to specialize where they see benefit to it. This compares favorably to OOP polymorphism, where devirtualization can't be performed as robustly or universally, or it requires runtime JIT assistance, as in the case of Java. As we see, more information in static types helps code optimization as well. 
 
 > Current dependently typed languages tend to have an *excess* of static information that is largely ignored by backends, because there hasn't been yet relevant research in this area, or there hasn't been need for that much performance.
 
-##### 2.4 Coherent and incoherent type classes
+##### 2.4 Coherent type classes
 
 Let's start off by defining coherence:
 
@@ -180,10 +180,45 @@ dilemma Box a = show a
 
 Haskell programmers have no control over which instance is used here. But that's no issue; coherence implies that the two instances are the same, so chosing one or another makes no difference. 
 
+Coherence significantly enhances robustness. It implies that all the following factors are irrelevant to type class semantics:
+
+- The order of local bindings
+- The order of top-level bindings
+- The order of module imports
+- Visibility modifiers on module imports and exports
+- The order of class constraints in classes, instances and definitions
+
+Coherent classes also have the "diamond" property, namely that there could be multiple derivations of *constraint entailment*, but all derivations result in the same instance:
 
 
+```
+          Ord a
+        /       \
+       /         \
+    Eq a       Ord (List a)
+      \           /
+       \         /
+        \       /
+        Eq (List a)
+```
 
-The type is desugared into `Eq a -> a -> a -> a -> a` in GHC's intermediate representation. 
+In the above diagram, we have `class Eq a => Ord`, `instance Eq a => Eq (List a)` and `instance Ord a => Ord (List a)`. Therefore, if we know `Ord a`, we can derive `Eq (List a)` in two different ways. 
+
+The first derivation takes the left path, using the `Ord` superclass to get to `Eq a`, then the `List` `Eq` instances. The right derivation first follows the `Ord (List a)` instance and follows the `Ord` superclass thereafter. 
+
+Of course, coherence already implies that all derivations must agree. The diamond property is interesting because is illustrates that coherent systems can hide the details of resolution algorithms from programmers. Incoherent system should also behave in a well-defined and sensible way, but they must necessarily expose the resolution procedure so that programmers can anticipate its effects. 
+
+What makes coherent type classes coherent? Certainly, we should expect that strong guarantees are realized through restrictions, which is the case here:
+
+- All instances must be defined in instance declarations and cannot be  passed explicitly. This implies that programmers can override instances by passing in values explicitly. This obviously contradicts coherence.
+- The instance heads of a class
+    - Must be disjunct and non-overlapping, if we allow modularity, i. e. different sets of instances visible in different modules. If we allow both modularity and overlapping then it could be the case a module defines a more specific overlapping instance than another module, and thus two different runtime instances may end up in the program. 
+    - May be overlapping, but must always resolve to a most specific head, if we disallow modularity and mandate a globally consistent set of instances. This restriction rarely applies, since global consistence is highly anti-modular. In short, it requires that if a module wants to define a specialized overlapping instance, then that specialized instance must be also added to the module with the class declaration. 
+- There mustn't be "orphan instances", i. e. instances such that their classes aren't declared in the module of the instance, and the types in their heads aren't defined in the module either.
+
+There is some variation in the handling of overlapping and orphan instances in languages with coherent classes. GHC Haskell allows orphan instances (with compile-time warnings), and one can also enable overlapping instances through a compiler pragma. Rust disallows both categorically. 
+
+##### 2.5 Incoherent type classes
 
 
 --------------------------------
