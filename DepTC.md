@@ -64,6 +64,8 @@ h :: A B -> String
 h = show
 ```
 
+> ** In the instance declaration `instance Show a => Show (A a) where ...`, we call `(A a)` the instance head and `Show a` the instance constraint. **
+
 In the example above, we have merely written `h = show` instead of the more fine-grained `h = g f` definition. We employed automatic search by invoking the `show` class method. Our Haskell compiler performed roughly the following steps:
 
 1. Try to prove `Show (A B)`
@@ -139,7 +141,9 @@ Let's start off by defining coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
 
-Runtime, instances are just records of values and functions, similar to virtual tables in C++ (supposed that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
+(TODO: src on this coherence)
+
+Let's provide some backgrouond exaplanation. Runtime instances are just records of values and functions, similar to virtual tables in C++ (supposed that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
 
 ```haskell
 f :: Eq a => a -> a -> a -> a
@@ -160,14 +164,21 @@ data ShowBox a where
   Box :: Show a => ShowBox
 ```
 
-`Box` holds a dynamic `Show a` instance, and we can write code that releases the instance into the outer scope by pattern matching on the box:
+`Box` holds a dynamic `Show a` instance. We can release the instance into the outer scope by pattern matching on the box:
 
 ```haskell
 applyBox :: ShowBox a -> a -> String
 applyBox Box a = show a
 ```
 
-Here, we were able to use the `show` method because by "opening" the box we made the `Show` instance available. 
+However, this flexible treatment of instances leads to a potential dilemma. Suppose that there are multiple instances in scope, all with the same type. Which one do we actually use when we invoke a method?
+
+```haskell
+dilemma :: Show a => ShowBox a -> a -> String
+dilemma Box a = show a
+```
+
+Haskell programmers have no control over which instance is used here. But that's no issue; coherence implies that the two instances are the same, so chosing one or another makes no difference. 
 
 
 
