@@ -213,28 +213,124 @@ What makes coherent type classes coherent? Certainly, we should expect that stro
 - All instances must be defined in instance declarations and cannot be  passed explicitly. This implies that programmers can override instances by passing in values explicitly. This obviously contradicts coherence.
 - The instance heads of a class
     - Must be disjunct and non-overlapping, provided that we allow modularity, i. e. different sets of instances visible in different modules. If we allow both modularity and overlapping then it could be the case that a module defines a more specific overlapping instance than another module, and thus two different runtime instances may end up in the program. On the other hand, overlapping instance could be made coherent if we give up modularity, i. e. mandate a single globally consistent set of instances, but this option isn't practical in any realistic module system. 
-- There mustn't be "orphan instances", i. e. instances such that their classes aren't declared in the module of the instance, and the types in their heads aren't defined in the module either. In the presence of orphan instances we could just define two different orphan instances in different modules, then export them wrapped in a runtime box, to be used in a single module - destroying coherence. 
+- There mustn't be "orphan instances", i. e. instances such that their classes aren't declared in the module of the instance, and the types in their heads aren't defined in the module either. In the presence of orphan instances we could just define two different orphan instances in different modules, then export them wrapped in a runtime box, to be used in a single module - destroying coherence.
 
-There is some variation in the handling of overlapping and orphan instances in languages with coherent classes. GHC Haskell allows orphan instances (with compile-time warnings), and one can also enable overlapping instances through a compiler pragma. Rust disallows both categorically. 
+Backtracking instance resolution is also incompatible with coherence and modularity. Disjunct instance heads eliminate non-determinism in instance matching, so the only remaining point for backtracking choice would be instance constraints. In pseudo-Haskell:
+
+```haskell
+instance (Ord a || Eq a) => Foo a where ...
+  -- There must be some mechanism here for dispatching on the presence of `Ord a` or `Eq a`
+```
+
+However, it's easy to see that this is equivalent to backtracking choice with two instances:
+
+```haskell
+instance Ord a => Foo a where ...
+instance Eq a => Foo a where ...
+```
+
+There is some variation in the handling of overlapping and orphan instances in languages with coherent classes. GHC Haskell allows orphan instances (with compile-time warnings), and one can also enable overlapping instances through a compiler pragma. Rust disallows both.
 
 ##### 2.5 Incoherent type classes
+
+Incoherent classes have their own set of advantages: they can be considerably more flexible.
+
+First, they allow first-class treatment of instances: they become ordinary values that can be explicitly passed around. Programmers can override implicits with explicit details.
+
+In Agda notation, instance arguments are indicated by double braces:
+
+```agda
+record Monoid (A : Set) : Set where
+  field
+    mempty : A
+    mappend : A -> A -> A
+
+twice : forall {A : Set}. {{monA : Monoid A}} -> A -> A
+twice a = mappend a a
+```
+
+In the above code, `twice` takes an instance of the type `Monoid A`. `twice` can be used with a single `A` argument, and the compiler would try to pass an available instance implicitly (the implicits mechanism in Scala works similarly). But we can also invoke `twice` as follows:
+
+```agda
+postulate
+  A : Set
+  monA : Monoid A
+  x : A
+
+foo : A
+foo = twice {{monA = monA}} x
+```
+
+There is a mechanism in Agda for defining Haskell-style instances, but instance arguments can be still used in their absence.
+
+Also, we saw that Agda classes are just *records*, and instances are just certain values with record types. We could implement two different `Monoid Nat` instances for natural numbers, one with addition as operation and one with multiplication:
+
+```agda
+
+plusMonoid : Monoid Nat
+plusMonoid = record {mempty = 0; mappend = _+_}
+
+multMonoid : Monoid Nat
+multMonoid = record {mempty = 1; mappend = _*_}
+
+```
+
+With coherent instances, we're forced to have only one instance for an instance head, even when there could be plausibly more. In Haskell, multiple instances are handled through "newtype-s", i. e. unary wrappers without runtime cost that introduce a strongly-typed aliases.
+
+```haskell
+newtype Sum a = Sum a
+newtype Product a = Product a
+
+instance Num a => Monoid (Pls a) where
+  mempty = Sum 0
+  mappend (Sum a) (Sum b) = Sum (a + b)
+
+instance Num a => Monoid (Product a) where
+  mempty = Product 1
+  mappend (Product a) (Product b) = Product (a * b)
+```
+
+`Sum a` and `Product a` are types that differ from the underlying `a`-s, although they have the same runtime representation. They allow us to define to different `Monoid` instances. Their drawback is that we must use the `Plus` and `Product` constructors to wrap and unwrap values. This can be annoying, so Haskell has a mechanism for safely coercing values between representationally equal types:
+
+```haskell
+foo :: List Product
+foo = map Product [0..10]
+
+bar :: List Sum
+bar = coerce foo
+```
+
+Also, incoherent classes support backtracking resolution, which makes it possible to vary and specialize implementations based on the availability of certain instances. For example, backtracking makes it possible to implement the removal of duplicate elements from a list (`nub`) in `O(n * log n)` if the elements can be ordered, and fall back to an `O(n^2)` definition if the elements only support equality. Coq and Lean support such backtracking.
+
+Incoherence also makes it possible to make search more liberal; in Scala, ordinary bindings in local or top scope are searched for instance candidates.
+
+The main drawbacks of incoherence are
+
+- Complexity of instance resolution, fragile semantics with respect to small program transformations
+
+(TODO Scala implicits rules, alphabetized imports, etc..)
+
+- Some uses cases ruled out by lack of coherence
+
+A classic example that requires is crucially is ordered sets and associative data structures ordered by keys. To modify such data structures we need functions for comparing keys. Most importantly, each modification must use the same comparison function in order to maintain structural invariants. In Haskell, a `Ord` class constraint implies that invariants are preserved, by class coherence.
+
+```haskell
+insert :: Ord k => Map k v -> k -> v -> Map k v
+```
+In the absence of coherence, `Map`-s must either
+- Store a comparison method internally
+- Have a static dependency on a particular comparison method
+
+The first solution has significant drawbacks. Algorithms that require having the same ordering for two containers (for example, efficient set union) are impossible to implement. The second solution is more auspicious; for example, it is used in C++ STL containers. 
+
+
 
 
 --------------------------------
 
--- performance....
 
-  - Types carry information. By inspecting the structure of types we get a lot of information, and type classes allow us to *act* on that information. It also allows us to make our data types as lean and general as possible ("dumb reusable data"), and implement Prolog "rule" instances instead of "fact" instances. Type classes operate over a potentially infinite term language of type constructors (example: Show (a, b), Show ((a, b), (c, d)) etc.). 
-  - Class methods can be dispatched statically in the vast majority of cases. Rust only uses static dispatch. The compiler has great freedom to dispatch statically or dinamically as it sees fit. The programmer can precisely introduce dynamic dispatch via existentially boxed instances and higher-order functions. 
-  - Proven abstractions from algebra and category theory relatively well expressible with type classes. 
-  - Contrast OOP abstraction: its primary job is *enforcing* structural and nominal relations. OOP doesn't generate code; we can either inherit existing code or override it. Class hierarchies are glued together nominally, and just sort of sit there. Example: inability in Java or Eiffel to have a generic pair type that's Eq iff the two fields are Eq. Abstraction by polymorphism involves lots of virtual calls, Java has to rely on JIT to devirtualize. Type classes are closer to actual programming problems ("given context of code implement some other code" versus "let's try to come up with a bunch of complicated structural relations between objects that gives us maximal code reuse by inclusion"). 
+##### 2.3. Coherent versus incoherent classes
 
-##### 2.3. Coherent versus incoherent classes 
-
-- What do they mean
-- Advantages of coherence (robustness, definitional instance equality, entailment as logic)
-- Advantages of incoherence (first-class dictionaries, backtracking, overlapping)
-- Examples and anecdotes
 - coherence in programming languages vs coherence in proof assistants
 - We'll consider coherence as important point later in dep types. 
 
@@ -280,24 +376,6 @@ There is some variation in the handling of overlapping and orphan instances in l
       - some kind of local instance scoping? But we could do first class module opening instead.
          
     
-    
-   
-
-
-
-
-
-
-
-
-   
-- Different flavors
-  - coherent/non-coherent
-  - first-class dictionaries
-  - other extensions: associated types, multi-param, fundeps, kinds class .. blah blah
-    - plz discuss only the important core features
-    
-
 ##### 3. More generally on code generation: 
   - methods of code generation: 
       - program inference
