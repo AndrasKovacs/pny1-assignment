@@ -304,13 +304,13 @@ Also, incoherent classes support backtracking resolution, which makes it possibl
 
 Incoherence also makes it possible to make search more liberal; in Scala, ordinary bindings in local or top scope are searched for instance candidates.
 
-The main drawbacks of incoherence are
+The main drawbacks of incoherence are: 
 
-1. Complexity of instance resolution, fragile semantics with respect to small program transformations
+> **1. Complexity of instance resolution, fragile semantics with respect to small program transformations**
 
 Naturally, the lack of coherence's robustness manifests itself as fragility, for example as a Scala program that breaks after someone aplphabetizes the package imports. 
 
-2. Some uses cases ruled out by lack of coherence
+> **2. Some uses cases ruled out by lack of coherence**
 
 A classic example that requires is crucially is ordered sets and associative data structures ordered by keys. To modify such data structures we need functions for comparing keys. Most importantly, each modification must use the same comparison function in order to maintain structural invariants. In Haskell, a `Ord` class constraint implies that invariants are preserved, by class coherence.
 
