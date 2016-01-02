@@ -208,7 +208,7 @@ The first derivation takes the left path, using the `Ord` superclass to get to `
 
 Of course, coherence already implies that all derivations must agree. The diamond property is interesting because is illustrates that coherent systems can hide the details of resolution algorithms from programmers. Incoherent system should also behave in a well-defined and sensible way, but they must necessarily expose the resolution procedure so that programmers can anticipate its effects. 
 
-What makes coherent type classes coherent? Certainly, we should expect that strong guarantees are realized through restrictions, which is the case here:
+What makes coherent type classes so? Certainly, we should expect that strong guarantees are realized through restrictions, which is the case here:
 
 - All instances must be defined in instance declarations and cannot be  passed explicitly. This implies that programmers can override instances by passing in values explicitly. This obviously contradicts coherence.
 - The instance heads of a class
@@ -306,11 +306,11 @@ Incoherence also makes it possible to make search more liberal; in Scala, ordina
 
 The main drawbacks of incoherence are
 
-- Complexity of instance resolution, fragile semantics with respect to small program transformations
+1. Complexity of instance resolution, fragile semantics with respect to small program transformations
 
-(TODO Scala implicits rules, alphabetized imports, etc..)
+Naturally, the lack of coherence's robustness manifests itself as fragility, for example as a Scala program that breaks after someone aplphabetizes the package imports. 
 
-- Some uses cases ruled out by lack of coherence
+2. Some uses cases ruled out by lack of coherence
 
 A classic example that requires is crucially is ordered sets and associative data structures ordered by keys. To modify such data structures we need functions for comparing keys. Most importantly, each modification must use the same comparison function in order to maintain structural invariants. In Haskell, a `Ord` class constraint implies that invariants are preserved, by class coherence.
 
