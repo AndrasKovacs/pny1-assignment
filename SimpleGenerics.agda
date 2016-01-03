@@ -8,8 +8,6 @@ data Desc : Set where
 data ⊤ : Set where
   tt : ⊤
 
-data ⊥ : Set where
-
 data _×_ (A B : Set) : Set where
   _,_ : A → B → A × B 
 
