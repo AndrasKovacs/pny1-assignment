@@ -308,7 +308,7 @@ The main drawbacks of incoherence are:
 
 > **1. Complexity of instance resolution, fragile semantics with respect to small program transformations**
 
-Naturally, the lack of coherence's robustness manifests itself as fragility, for example as a Scala program that breaks after someone aplphabetizes the package imports. 
+Naturally, the lack of coherence's robustness manifests itself as fragility, for example as a Scala program that breaks after someone alphabetizes the package imports. 
 
 > **2. Some uses cases ruled out by lack of coherence**
 
@@ -343,6 +343,9 @@ In proof writing, very frequently the operational semantics or performance of co
 
 However, we would like to ultimately integrate software development and proof writing seamlessly. Currently, Coq and Agda are very cumbersome for software development, and Haskell is very cumbersome and unreliable for proof writing. Designing type classes for an integrated environemnt would require a careful balancing act or provision of different and orthogonal orthogonal search techniques for proof and program writing. Some of this will be discussed later. 
 
+#### 3. Advanced language features vs. type classes
+
+#### 4. Type classes and coherence in advanced languages
 
 
 
