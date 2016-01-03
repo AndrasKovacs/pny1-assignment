@@ -370,9 +370,32 @@ data Desc : Set where
   
 Nat : Desc
 Nat = one + rec
+
+-- also:
+Bool : Desc
+Bool = one + one
 ```
 
-For brevity I shall omit the rest of 
+For the sake of brevity I shall omit more Agda code here. The rest of the example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* describe types, for example we can implement generic equality:
+
+```agda
+
+-- Note: "μ A" is the least fix point of A's interpretation and ⟨_⟩ is its constructor
+
+mutual
+  gEq : ∀ {A} → μ A → μ A → μ Bool
+  gEq {A} ⟨ a ⟩ ⟨ a' ⟩ = gEq' {A} a a'
+
+  gEq' : ∀ {A d} → ⟦ A ⟧ (μ d) → ⟦ A ⟧ (μ d)  → μ Bool
+  gEq' {A + B} (l a)   (l a')    = gEq' {A} a a'
+  gEq' {A + B} (r b)   (r b')    = gEq' {B} b b'
+  gEq' {A + B} _       _         = false
+  gEq' {A * B} (a , b) (a' , b') = and (gEq' {A} a a') (gEq' {B} b b')
+  gEq' {rec}   a       b         = gEq a b
+  gEq' {fix A} a       b         = gEq a b
+  gEq' {one}   _       _         = true
+```
+
 
 
 
