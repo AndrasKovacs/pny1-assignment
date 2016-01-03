@@ -349,7 +349,7 @@ In this section we change gears and examine whether some advances features and t
 
 ##### 3.1. Generic programming
 
-By "generic programming" we mean programming with closed type universes, which includes solutions such as Scrap Your Boilerplate and GHC.Generics in Haskell and direct uses of type universes in dependent languages. 
+By "generic programming" I mean programming with closed type universes, which includes solutions such as Scrap Your Boilerplate and GHC.Generics in Haskell and direct uses of type universes in dependent languages. 
 
 The general idea is that we have *descriptions* or *codes* for datatypes inside the language, and we can use descriptions to guide computation on values of described types. Type universes are data types whose values are descriptions (although full-fledged universes require dependent typing).
 
@@ -359,7 +359,7 @@ What makes type universes different from regular user-defined types in Haskell o
 data Nat = Zero | Succ Nat
 ```
 
-then just by looking at the name `Nat` we can't glean any information about its constructors and general shape. In Agda, we could define a simple universe for types (least fixpoints of polynomial functors), and give a description for Nat in that universe:
+then just by looking at the name `Nat` we can't glean any information about its constructors and general shape. In Agda, we can define a simple universe for types (least fixpoints of polynomial functors), and give a description for Nat in that universe:
 
 ```agda
 data Desc : Set where
@@ -370,31 +370,10 @@ data Desc : Set where
   
 Nat : Desc
 Nat = one + rec
-
--- also:
-Bool : Desc
-Bool = one + one
 ```
+The `Nat` description can be now interpreted as a polynomial functor in Agda (and we can take its fixpoint), and use that in lieu of the old `Nat`, but now the structure of the type is available for inspection. 
 
-For the sake of brevity I shall omit more Agda code here. The rest of the example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* describe types, for example we can implement generic equality:
-
-```agda
-
--- Note: "μ A" is the least fix point of A's interpretation and ⟨_⟩ is its constructor
-
-mutual
-  gEq : ∀ {A} → μ A → μ A → μ Bool
-  gEq {A} ⟨ a ⟩ ⟨ a' ⟩ = gEq' {A} a a'
-
-  gEq' : ∀ {A d} → ⟦ A ⟧ (μ d) → ⟦ A ⟧ (μ d)  → μ Bool
-  gEq' {A + B} (l a)   (l a')    = gEq' {A} a a'
-  gEq' {A + B} (r b)   (r b')    = gEq' {B} b b'
-  gEq' {A + B} _       _         = false
-  gEq' {A * B} (a , b) (a' , b') = and (gEq' {A} a a') (gEq' {B} b b')
-  gEq' {rec}   a       b         = gEq a b
-  gEq' {fix A} a       b         = gEq a b
-  gEq' {one}   _       _         = true
-```
+For the sake of brevity I shall omit more Agda code here. The rest of the example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* described types. For example, we can implement generic equality, pretty printing, serialization, zippers or lenses. In more advanced (dependent) languages we can define subsets of a larger universe using type-theoretic predicates, and define generic function that work only on some subsets; for example generic equality that only works on types that doesn't contain function fields. 
 
 
 
