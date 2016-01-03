@@ -345,7 +345,7 @@ However, we would like to ultimately integrate software development and proof wr
 
 #### 3. Advanced language features versus type classes
 
-In this section we change gears and examine whether some advances features and techniques could make type classes superfluous. 
+In this section we examine whether some advances features and techniques could make type classes superfluous. 
 
 ##### 3.1. Generic programming
 
@@ -373,7 +373,17 @@ Nat = one + rec
 ```
 The `Nat` description can be now interpreted as a polynomial functor in Agda (and we can take its fixpoint), and use that in lieu of the old `Nat`, but now the structure of the type is available for inspection. 
 
-For the sake of brevity I shall omit more Agda code here. The rest of the example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* described types. For example, we can implement generic equality, pretty printing, serialization, zippers or lenses. In more advanced (dependent) languages we can define subsets of a larger universe using type-theoretic predicates, and define generic function that work only on some subsets; for example generic equality that only works on types that doesn't contain function fields. 
+For the sake of brevity I shall omit more Agda code here. The rest of the example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* described types. For example, we can implement generic equality, pretty printing, serialization, zippers, lenses and more. In more advanced (dependent) languages we can define subsets of a larger universe using type-theoretic predicates, and define generic function that work only on some subsets; for example generic equality that only works on types that doesn't contain function fields. 
+
+In practical implementations of generic programming in Haskell, Clean or Purescript, and generic functions are used via an extra conversion from user-defined types to generic representations and back. This has some performance overhead, and generic representations also tend to have greater memory footprint. Nevertheless, optimized generics are possible, as are languages that have generic types by default, or have *all* types in generic form.
+
+Turning back to type classes, can we expect that generic programming can replace them? 
+
+The answer is likely no. Generic programming does overlap with type classes, and it's usually a good choice in those cases (decidable equality, enumeration, serialization, etc.), but many classes are extremely hard to express generically. For example, instances for most algebraic structures cannot be derived mechanically. For example, natural numbers form a ring, but ring-ness can't be easily decided for arbitrary types.
+
+Also, despite our best intentions a large amount of meaning and intent will be always expressed by the *naming* of types. Programmers often use isomorphic but differently named types, because most of the time there's no need or energy to express all relevant semantics in types. Thus, generics may be good for serialization, but not quite good for pretty printing, since generic functions are don't know much about the context in which a type is used or the intent of the programmer. It's a common bit of pain in programming languages that support some form of printing for all types: the printed outputs tend to be messy, verbose or uninformative. 
+
+But I must stress that there is a considerable amount of research on dependently typed generic programming that enable extremely powerful abstractions (mind-blowing is an appropriate term). For example, see Conor McBride's work on algebraic ornaments, which are descriptions of *annotations*, *modifications* and *information erasure* on types. Ornaments describe notions such as "lists are natural numbers annotated with fields of some type" and "the erasure of fields from lists yields a natural number which is the length of the list", and they also enable some automatic lifting of functions operating on a type to a modified version of that type. Generics also tend to synergize with type classes: in Haskell, a less expressive language, type classes are even required for defining generic functions, since they're the main mechanism for dispatching on types. 
 
 
 
