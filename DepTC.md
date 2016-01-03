@@ -312,16 +312,37 @@ Naturally, the lack of coherence's robustness manifests itself as fragility, for
 
 > **2. Some uses cases ruled out by lack of coherence**
 
-A classic example that requires is crucially is ordered sets and associative data structures ordered by keys. To modify such data structures we need functions for comparing keys. Most importantly, each modification must use the same comparison function in order to maintain structural invariants. In Haskell, a `Ord` class constraint implies that invariants are preserved, by class coherence.
+A classic example is ordered sets and associative data structures ordered by keys. To modify such data structures we need functions for comparing keys. Most importantly, each modification must use the same comparison function in order to maintain structural invariants. In Haskell, a `Ord` class constraint implies that invariants are preserved, by class coherence.
 
 ```haskell
 insert :: Ord k => Map k v -> k -> v -> Map k v
 ```
 In the absence of coherence, `Map`-s must either
 - Store a comparison method internally
-- Have a static dependency on a particular comparison method
+- Have a type-level dependency on a particular comparison method
 
-The first solution has significant drawbacks. Algorithms that require having the same ordering for two containers (for example, efficient set union) are impossible to implement. The second solution is more auspicious; for example, it is used in C++ STL containers. 
+The first solution has significant drawbacks. Algorithms that require having the same ordering for two containers (for example, efficient set union) are impossible to implement. I find the second solution better and its complexity cost acceptable. An example for the second solution in the wild is C++ STL containers.
+
+##### 2.6 Comparing merits
+
+What's the verdict on coherence, then? 
+
+First, I posit that coherence has significant benefits in robustness and scalability, and thus I will henceforth consider it desirable in hypothetical languages. A good heuristic in programming and mathematics is to use the least powerful tool that gets the job done, because they tend to be simpler, easier to reason about, and also more generally applicable (that said, in software development we have a great number of tools that are complicated and weak at the same time).  
+
+Still, there are many caveats and footnotes to this. 
+
+First, coherence and incoherence are a convenient and simple categorization of real-world systems, but there are many features and details that determine type classes' usability in the context of a given language. There's a great variance in the methods for incoherent search. The `IncoherentInstances` extension of GHC Haskell is rather simple, Agda's instance search is more complex, Coq also features backtracking, while Scala's search doesn't have backtracking but is very complex partly because it's embedded in a complex language. It might be the case that some real-world systems benefit from incoherence and never suffer from their drawbacks, or there may be some sweet spot of search complexity that balances robustness and flexibility, and it isn't necessarily coherent search. 
+
+> This connects to the general issue of software methodology and productivity research, which hasn't delivered specatular results so far (that I know of). In particular, there is a large amount of quantitative research that could be potentially done to inform programming language design. Such reasearch would be preferable to the status quo of language design which mostly builds upon accumulated subjective experience of programmers and public discussion (where the most vociferous participants may or may not emphasize the practicaly most important points).
+
+Second, proof writing and software development have differences that affect the usefulness of various search techniques. 
+
+In software development, the norm is that programs carry relatively few proofs and semantics is loosely determined by types alone. Software projects comparatively larger amount of code and more complex modularization, and code tends to be refactored and modified more frequently. In this environemnt coherence provides a relatively large benefit. 
+
+In proof writing, very frequently the operational semantics or performance of code (proof terms) isn't relevant at all; the primary goal is to provide *some* proof. This ethos is exemplified by Coq where users often just throw powerful automated search at various problems without even making an effort to understand the resulting proof (if there is one). It's not an inherently bad practice, since there is finite amount of human effort that can be expended on understanding things, and it's often better to focus on understanding the most important points and leave dirty work to automation. Also, since specifications are so precise, erratic instance resolution rarely causes sneaky errors. There, plugging in a wrong instance tends to prevent type checking, since proofs often rely on the implementations of class methods. In this environment, coherence provides a relatively small benefit. 
+
+However, we would like to ultimately integrate software development and proof writing seamlessly. Currently, Coq and Agda are very cumbersome for software development, and Haskell is very cumbersome and unreliable for proof writing. Designing type classes for an integrated environemnt would require a careful balancing act or provision of different and orthogonal orthogonal search techniques for proof and program writing. Some of this will be discussed later. 
+
 
 
 
