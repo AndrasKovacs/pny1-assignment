@@ -385,7 +385,35 @@ Also, despite our best intentions a large amount of meaning and intent will be a
 
 But I must stress that there is a considerable amount of research on dependently typed generic programming that enable extremely powerful abstractions (mind-blowing is an appropriate term). For example, see Conor McBride's work on algebraic ornaments, which are descriptions of *annotations*, *modifications* and *information erasure* on types. Ornaments describe notions such as "lists are natural numbers annotated with fields of some type" and "the erasure of fields from lists yields a natural number which is the length of the list", and they also enable some automatic lifting of functions operating on a type to a modified version of that type. Generics also tend to synergize with type classes: in Haskell, a less expressive language, type classes are even required for defining generic functions, since they're the main mechanism for dispatching on types. 
 
+##### 3.2. Higher-order modules
 
+These come under a variety of names. They first became popular in ML, where they're called "functors". Sometimes they're called first-class modules. The core features are:
+
+- Modules can be parametrized by values, types and other modules, and can be applied to parameters like functions.
+- Modules support existential (abstract) types, or more generally, existential quantification.
+- Modules form namespaces that can be nested, and name visibility can be flexibly controlled.
+
+Coq, Agda and Lean all support such modules. Higher-order modules combined with dependent types are extremely powerful and can easily express any [*algebraic specification*](https://en.wikipedia.org/wiki/Algebraic_specification). From now on I'll call them "Agda-style modules" and provide examples in Agda since that's I'm familiar with the most. 
+
+Agda-style modules disallow any kind of nominal ambiguity and overloading. Instead, it provides the programmer extremely fine-grained control over namespaces and makes it possible to assemble modules and namespaces on-the-fly. In Agda, it is possible to import modules inside *arbitrary expressions*, including *type annotations*, and we can declare (nested) modules even in local scope. We can also qualify, rename and hide imported names. 
+
+Thus, the Agda standard library deliberately has many colliding names. The standard practice is to have only a small amount of top-level imports in a source file, and import locally whenever some functionality is needed. For a silly example, lists have an obvious `Monoid` implementation, and we can locally use the standard `Monoid` names, which are `∙` for the binary operation and `ε` for identity:
+
+```agda
+open import Algebra   -- contains the Monoid record declaration
+open import Data.List -- contains the monoid implementation for List
+
+myListFun : {A : Set} → List A → List A → List A
+myListFun xs ys = ys'
+  where
+    open Monoid (Data.List.monoid _) -- locally open module    
+    xss = xs ∙ xs    
+    ys' = ys ∙ xs ∙ ε
+```
+
+Here, in `open Monoid (Data.List.monoid _)`, `Monoid` refers to the declaration in `Algebra`, and `Data.List.monoid` refers to the implementation for lists. Also, `Monoid` is just a record declaration whose fields are the monoid operations and axioms. It's possible to write custom `Monoid` implementations, and open them instead. It's also possible to override any field of a record, or selectively hide, redefine or reexport record/module fields. 
+
+This is a lot of power. The Agda standard library makes judicious use of it, and takes abstraction and modularization rather far, which can be downright scary for newcomers. For an illustration, see the source for [`Algebra`](https://github.com/agda/agda-stdlib/blob/master/src/Algebra.agda). 
 
 
 
