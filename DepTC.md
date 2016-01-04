@@ -459,8 +459,6 @@ In general, methods for overloading and code abstraction should let us write cod
 It's a very good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean. 
 
 
-
-
 --------------------------------
 
 
