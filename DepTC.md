@@ -448,15 +448,15 @@ module M (A : Set) (foo : Foo A) where
   f = ...
 ```
 
-Now, by `open M A foo`, we pass a dictionary to an entire namespace, so there's much less need for manually applying functions to `foo` instances all the time. 
+Now, by `open M A foo`, we pass a dictionary to an entire namespace, so there's much less need for manually applying functions to `foo` instances. 
 
 So, should we scrap type classes and use modules instead? Well, probably not.
 
-It's indeed possible to have a *decent* programming experience only with modules. But modules are a bit too literal-minded and laborous. They present a non-trivial amount of inconvenience that lazy programmers are all too keen to avoid. They don't really do *search*, which as I described is at the heart of type classes. They make it very easy to do instance search manually, they make it easy to navigate namespaces, they just don't search for us. 
+It's indeed possible to have a *decent* programming experience only with modules. But modules are a bit too literal-minded and laborous. They present a non-trivial amount of inconvenience that lazy programmers are all too keen to avoid. They don't really do *search*, which as I described previously is at the heart of type classes. They make it very easy to do instance search manually, they make it easy to navigate namespaces, they just don't search for us. 
 
-In general, methods for overloading and code abstraction should let us write code that looks a bit like mathematics papers. There, authors often spend a paragraph or two reviewing notation, then dive into the subject, or often just assume usual notational conventions. They also tend to overload symbols based on their usage, without spending too much time pointing out different usages. The reason why code should look so is that math papers evolved over a long time for optimal conveyance of ideas, and strike a good balance between literal-minded verbosity and obscure terseness. Type classes come pretty close to this. In contrast, modules mandate a literal-mindedness that's tad too stifling. 
+In general, methods for overloading and code abstraction should let us write code that looks a bit like mathematics papers. There, authors often spend a paragraph or two reviewing notation, then dive into the subject, or often just assume usual notational conventions. They also tend to overload symbols based on their usage, without spending too much time pointing out different usages. The reason why code should look so is that math papers evolved over a long time for optimal ability to convey ideas, and strike a good balance between literal-minded verbosity and obscure terseness. Type classes come pretty close to this. In contrast, modules mandate an explicitness that's tad too stifling. 
 
-It's a very good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean. 
+It's a good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean. 
 
 
 --------------------------------
