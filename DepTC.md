@@ -245,7 +245,7 @@ record Monoid (A : Set) : Set where
     mempty : A
     mappend : A -> A -> A
 
-twice : forall {A : Set}. {{monA : Monoid A}} -> A -> A
+twice : {A : Set} {{monA : Monoid A}} -> A -> A
 twice a = mappend a a
 ```
 
