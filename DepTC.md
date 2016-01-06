@@ -456,7 +456,50 @@ It's indeed possible to have a *decent* programming experience only with modules
 
 In general, methods for overloading and code abstraction should let us write code that looks a bit like mathematics papers. There, authors often spend a paragraph or two reviewing notation, then dive into the subject, or often just assume usual notational conventions. They also tend to overload symbols based on their usage, without spending too much time pointing out different usages. The reason why code should look so is that math papers evolved over a long time for optimal ability to convey ideas, and strike a good balance between literal-minded verbosity and obscure terseness. Type classes come pretty close to this. In contrast, modules mandate an explicitness that's tad too stifling. 
 
-It's a good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean. 
+It's a good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean.
+
+#### 4 Coherence versus dependent types
+
+Let's turn our attention to dependent types now. As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
+
+> **An implementation of type classes is coherent if all instances with equal types are equal.**
+
+However, the exact notion of equality is very important here, both of types and values. In dependently typed languages equality  greatly influences the range and style of proofs that can be expressed, and it's probably the most important point of divergence among different languages (extensional vs. intensional type theories, univalent type theories etc...).
+
+In type theories we usually consider two concepts of equality.
+
+*Definitional equality* is the kind of equality that is decidable by the type checker. For example, whenever we have a function application `(f x)`, the type checker must be able to decide the the input type of `f` is equal to the type of `x`. 
+
+*Propositional equality* is equality that can be proved inside the language, and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. experssions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral:
+
+```agda
+(3 + 4 + 0) -- reduces to 7
+```
+
+However, open terms may or may not reduce to numerals:
+
+```agda
+_+_ : Nat -> Nat -> Nat
+0     + b = b
+suc a + b = suc (a + b
+
+-- (n + 0) is in normal form
+-- (0 + n) reduces to n
+```
+
+Here `n + 0` and `n` are not definitionally equal! Definitional equality usually contains equality modulo alpha-beta-eta conversion; here we have beta conversion between `0 + n` and `n` since we defined addition with recursion on the first argument. `0 + n` is definitionally equal to `n` for any specific `n` numeral, but the type checker doesn't know this (and in general such equalitites are undecidable). We can rectify this issue in dependent language by introducing types that carry evidence for equality:
+
+```agda
+-- in Agda (simplified)
+data _≡_ {A : Set} (x : A) : A → Set where
+  refl : x ≡ x
+  
+-- in Haskell
+data (:~:) (x :: k) (y :: k) :: * where
+  Refl :: x :~: x 
+```
+
+Now we can write a function with type `(n : Nat) -> n + 0 ≡ n`, which express a valid equality that isn't contained in definitional equality. We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is derivable inside the language. 
 
 
 --------------------------------
