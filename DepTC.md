@@ -491,7 +491,7 @@ Here `n + 0` and `n` are not definitionally equal! Definitional equality usually
 
 ```agda
 -- in Agda (simplified)
-data _≡_ {A : Set} (x : A) : A → Set where
+data _≡_ {A : Set} (x : A) : (y : A) → Set where
   refl : x ≡ x
   
 -- in Haskell
@@ -499,7 +499,24 @@ data (:~:) (x :: k) (y :: k) :: * where
   Refl :: x :~: x 
 ```
 
-Now we can write a function with type `(n : Nat) -> n + 0 ≡ n`, which express a valid equality that isn't contained in definitional equality. We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is provable inside the language. 
+Now we can write a function with type `(n : Nat) -> n + 0 ≡ n` ([see link](https://github.com/AndrasKovacs/pny1-assignment/blob/master/Notes.agda#L4)). We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is provable inside the language. 
+
+With type classes, propositional equality becomes important when matching instance heads. Recall from section 2.4 that coherent type classes must have disjunt instance heads. We refine this to the following:
+
+> **Coherent type classes must have propositionally disjunct heads.**
+
+Consider a class has two instances that are inequal definitionally, but equal propositionally:
+
+```haskell
+class Foo (n :: Nat) where foo :: String
+instance Foo (n + 0) where foo = "A"
+instance Foo n       where foo = "B"
+
+
+
+
+
+
 
 
 --------------------------------
