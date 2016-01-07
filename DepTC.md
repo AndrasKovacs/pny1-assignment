@@ -460,7 +460,7 @@ It's a good idea though to have higher-order modules and type classes at the sam
 
 #### 4 Coherence versus dependent types
 
-Let's turn our attention to dependent types now. As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
+Let's turn our attention to dependent types. As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
 
@@ -499,7 +499,7 @@ data (:~:) (x :: k) (y :: k) :: * where
   Refl :: x :~: x 
 ```
 
-Now we can write a function with type `(n : Nat) -> n + 0 ≡ n`, which express a valid equality that isn't contained in definitional equality. We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is derivable inside the language. 
+Now we can write a function with type `(n : Nat) -> n + 0 ≡ n`, which express a valid equality that isn't contained in definitional equality. We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is provable inside the language. 
 
 
 --------------------------------
