@@ -502,7 +502,7 @@ data (:~:) (x :: k) (y :: k) :: * where
 
 Now we can write a function with type `(n : Nat) -> n + 0 ≡ n` ([see proof](https://github.com/AndrasKovacs/pny1-assignment/blob/master/Notes.agda#L4)). We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is provable inside the language. 
 
-With type classes, propositional equality becomes important when matching instance heads. Recall from section 2.4 that coherent type classes must have disjunct instance heads. We refine this to the following:
+With type classes, propositional equality becomes important when matching instance heads. Recall from section 2.4 that coherent type classes must have disjoint instance heads. We refine this to the following:
 
 > **Coherent type classes must have propositionally disjoint heads.**
 
