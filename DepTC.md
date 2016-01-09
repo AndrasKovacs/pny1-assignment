@@ -204,7 +204,7 @@ In the above diagram, we have `class Eq a => Ord`, `instance Eq a => Eq (List a)
 
 The first derivation takes the left path, using the `Ord` superclass to get to `Eq a`, then the `List` `Eq` instances. The right derivation first follows the `Ord (List a)` instance and follows the `Ord` superclass thereafter. 
 
-Of course, coherence already implies that all derivations must agree. The diamond property is interesting because is illustrates that coherent systems can hide the details of resolution algorithms from programmers. Incoherent systems should also behave in a well-defined and sensible way, but they must necessarily expose the resolution procedure so that programmers can anticipate its effects. 
+Of course, coherence already implies that all derivations must agree. The diamond property is interesting because it illustrates that coherent systems can hide the details of resolution algorithms from programmers. Incoherent systems should also behave in a well-defined and sensible way, but they must necessarily expose the resolution procedure so that programmers can anticipate its effects. 
 
 What makes coherent type classes such? Certainly, we should expect that strong guarantees are realized through restrictions, which is the case here:
 
