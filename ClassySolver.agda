@@ -1,7 +1,8 @@
 module ClassySolver where
 
 -- Monoid solver using instance resolution. Doesn't fully work (unsolved metas),
--- but it illustrates the idea
+-- but it illustrates the idea, in particular it would work if Agda's class implementation was more
+-- robust and mature. 
 
 open import Algebra
 open import Data.Product
