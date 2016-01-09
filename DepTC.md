@@ -633,6 +633,29 @@ Before in section 2.2 I talked chidingly about types whose intended meaning is e
 
 #### 5 Taming incoherent classes
 
+We've seen that in the long term (i. e. with univalence) it might be not feasible to keep coherence. Let's review some solutions and factors that might make incoherence more palatable. 
+
+**First**, there's a family of types for which coherence is always assured, with any kind of search procedure. These are *irrelevant* or *propositional* types:
+
+>**Propositional types** are types that have at most one element up to propositional equality.
+
+Class instances are just the product of the class methods, so if all methods are propositional, then the type of instances is also propositional - therefore the class is coherent. The question is: how many useful classes are propositional? 
+
+Actually, quite a few. Often, if we pin down the behavior and properties of a class precisely enough it becomes uniquely specified for each type. 
+
+A classic example is decidable equality. While regular `A -> A -> Bool` equality admits many implementations, decidable equality  with type `(x y : A) → (x ≡ y) ∨ ((x ≡ y) → ⊥)` has an extensionally unique implementation ([see my proof here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/DecEqProp.agda). This means that we can have a `DecEq` class, and recover simple Boolean equality from decidable equality, or we could have both equalities as methods, and require a proof (a third method) that they agree with each other. 
+
+What about specialized equalities? In Haskell, people sometimes use `newtype` wrappers to provide alternative instances for common classes. For example we could have a syntax tree with labels and other metadata that we would like to ignore when computing equality. With decidable equality, we can't implement "forgetful" alternative instances, right? Well, we can, if we use some homotopy-flavored type theory with [higher inductive types](https://ncatlab.org/nlab/show/higher+inductive+type). Higher induction allows us to specify *equality* constructors for data types, along with the old constructors for values. For example, a HIT wrapper that "forgets" the first field of a tuple could be the following:
+
+```agda
+data SquashFst (A B : Set) : Set where
+  wrap   : (A , B) → SmashFst A B  -- value constructor
+  squash : ∀ (a a' b) → wrap (a , b) ≡ wrap (a' , b)  -- equality constructor
+```
+
+`squash` makes the first elements irrelevant in determining equality of the wrapped pairs. We are then restricted (by the rules of HIT-s) to only write `f : SquashFst A B -> C` functions such that `∀ a a' b → f (wrap (a, b)) ≡ f (wrap (a', b))`, i. e. all functions must respect `squash`. Thus, `SquashFst` works like our usual Haskell `newtype` wrappers, except that it captures our intent far more precisely. 
+
+
 
 
 
