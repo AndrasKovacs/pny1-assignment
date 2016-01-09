@@ -675,4 +675,17 @@ As to future research, I briefly mentioned in section 2.1. that *constrained sea
 
 Also, it would be a fun and useful project to formalize class coherence, preferably in some existing machine-checked system, but it would be good if we had any sort of formal model. Currently, type classes are viewed (rightfully) as a theoretically ad-hoc preprocessing stage before translating frontend code to elegant and small core type theories. I also don't know of any formalization effort, and as of recently even [experts](http://cstheory.stackexchange.com/a/12530/22548) were like me in this regard.
 
+#### Appendix: test code for classes in Idris, Coq and Agda
+
+I included some bits of test code for the above three languages. I tried to investigate how they handle propositionally overlapping instances with function applications. 
+
+In [Idris](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassTest.idr), I found out that the language is just bugged out in this regard, and doesn't attempt to implement it properly. 
+
+In [Agda](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassTest.agda), I found that instance resolution usually refuses to decide in ambiguous cases with function applications, but I haven't yet looked at the underlying causes or the details of the implementation. Agda's type class implementation still has rough edges, and usually it's just not performant and stable enough for large-scale uses. 
+
+In [Coq](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassTest.v), I found that the language has pretty robust instance resolution (which is borrowed wholesale from the pre-existing tactics langauge), but also that it's very "trigger-happy" and silently solves even badly-behaved and silly examples, such as the `Foo` class in my example files. 
+
+I have not played around with the [Lean](http://leanprover.github.io/) prover. It might worth a look, especially since Lean prides itself on very fast instance resolution that is organically integrated into the elaborator.  
+
+
 
