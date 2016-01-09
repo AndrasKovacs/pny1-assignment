@@ -27,12 +27,12 @@ Section ClassTest.
   Definition bar' : forall f {dict : Bar f}, nat :=
     fun f dict => bar.
 
-  Compute (foo' 0).
-  Compute (foo' N).
-  Compute (foo' (N + 0)).
-  Compute (foo' (1 + N)).
+  Compute (foo' 0). (* 0 *)
+  Compute (foo' N). (* 0 *)
+  Compute (foo' (N + 0)). (* 0 *)
+  Compute (foo' (1 + N)). (* 1 *)
 
-  Compute (bar' plus).
-  Compute (bar' minus).
+  Compute (bar' plus). (* 0 *)
+  Compute (bar' minus). (* 1 *)
 
 End ClassTest.
