@@ -458,9 +458,13 @@ In general, methods for overloading and code abstraction should let us write cod
 
 It's a good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean.
 
-#### 4 Coherence versus dependent types
+#### 4 Type classes in dependent languages
 
-Let's turn our attention to dependent types. As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
+In dependent languages, the language of types and terms are the same. Given that types can be indexed or parametrized by values, values must be able to appear in instance heads. It's reasonable to allow class parameters that are values, or any terms indeed, therefore it might be better to speak of simply "classes". I'll still use "type classes" though, for consistence. 
+
+##### 4.1 Reviewing equality
+
+As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
 
@@ -470,13 +474,13 @@ In type theories we usually consider two concepts of equality.
 
 *Definitional equality* is the kind of equality that is decidable by the type checker. For example, whenever we have a function application `(f x)`, the type checker must be able to decide the the input type of `f` is equal to the type of `x`. 
 
-*Propositional equality* is equality that can be proved inside the language, and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. experssions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral:
+*Propositional equality* is can be proved inside the language and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. experssions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral (in a total language):
 
 ```agda
 (3 + 4 + 0) -- reduces to 7
 ```
 
-However, open terms may or may not reduce to numerals:
+However, open terms may or may not do so:
 
 ```agda
 _+_ : Nat -> Nat -> Nat
@@ -487,7 +491,7 @@ suc a + b = suc (a + b
 -- (0 + n) reduces to n
 ```
 
-Here `n + 0` and `n` are not definitionally equal! Definitional equality usually contains equality modulo alpha-beta-eta conversion; here we have beta conversion between `0 + n` and `n` since we defined addition with recursion on the first argument. `0 + n` is definitionally equal to `n` for any specific `n` numeral, but the type checker doesn't know this (and in general such equalitites are undecidable). We can rectify this issue in dependent language by introducing types that carry evidence for equality:
+Here `n + 0` and `n` are not definitionally equal. Definitional equality usually contains equality modulo alpha-beta-eta conversion; here we have beta conversion between `0 + n` and `n` since we defined addition with recursion on the first argument. `0 + n` is definitionally equal to `n` for any specific `n` numeral, but the type checker doesn't know this (and in general such equalitites are undecidable). We can rectify this issue in a dependent language by introducing types that carry evidence for equality:
 
 ```agda
 -- in Agda (simplified)
@@ -499,7 +503,7 @@ data (:~:) (x :: k) (y :: k) :: * where
   Refl :: x :~: x 
 ```
 
-Now we can write a function with type `(n : Nat) -> n + 0 ≡ n` ([see link](https://github.com/AndrasKovacs/pny1-assignment/blob/master/Notes.agda#L4)). We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is provable inside the language. 
+Now we can write a function with type `(n : Nat) -> n + 0 ≡ n` ([see proof](https://github.com/AndrasKovacs/pny1-assignment/blob/master/Notes.agda#L4)). We say that `x` is propositionally equal to `y` if `x ≡ y` or `x :~: y` is provable inside the language. 
 
 With type classes, propositional equality becomes important when matching instance heads. Recall from section 2.4 that coherent type classes must have disjunt instance heads. We refine this to the following:
 
@@ -508,9 +512,34 @@ With type classes, propositional equality becomes important when matching instan
 Consider a class has two instances that are inequal definitionally, but equal propositionally:
 
 ```haskell
+-- not valid Haskell
 class Foo (n :: Nat) where foo :: String
 instance Foo (n + 0) where foo = "A"
 instance Foo n       where foo = "B"
+```
+
+In an open context with `n :: Nat`, instance resolution may give us a dictionary with type `Foo (n + 0)`, but we can coerce that to `Foo n` using the proof that `(n + 0) :~: n`. The coerced dictionary is inequal to the dictionary resulting from resolving `Foo n`. For this reason, Haskell prohibits type families (which are like functions on the type level) in instance heads. 
+
+##### 4.2 Preserving coherence
+
+In general, one can preserve coherence by restricting instance heads to a language fragment with decidable propositional equality. Haskell does exactly this: it has a first-order term language of (necessarily injective) type constructors. However, the same language in instance heads would be awkward in a dependent language, since many commonly used types are parametrized with functions, for instance [sigma types](https://en.wikipedia.org/wiki/Dependent_type#Dependent_pair_type). Let's review some potential solutions. 
+
+**First**, if our language doesn't have [function extensionality](https://ncatlab.org/nlab/show/function+extensionality), then we have considerable amount leeway to use functions, since in this case definitional equality of functions coincides with propositional equality. The only expressions with undecidable propositional equality are *open expressions with non-function types containing function applications*. 
+
+For example, if `f` and `g` are top level functions, then `f` and `g` are OK in instance heads. `f x` is also OK if `f x` still has a function type (it's an unsaturated application) and `x` is OK as an expression. On the other hand, `n + 0` is not OK, since it has a value type (`Nat`), and it contains a function. 
+
+Restricting instance heads in this manner seems a good compromise. From the top of my head, I can't think of a useful type that would be exiled from classes. We use one use case though, namely reflection of open expressions, which can be convenient for automatic solvers. 
+
+For example, we might want to use [proof by reflection](http://adam.chlipala.net/cpdt/html/Reflection.html) for solving equations on monoids. It consists of taking equations like `a * ((b * 0) * c) = a * (0 * (b * c))`, normalizing both sides by reassociating operations and eliminating identities, then checking for definitional equality. We could implement this using classes by writing one instance for one normalization rule, while simultaneously building a proof that the normal form is equal to the original expression. See [this file](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassySolver.agda) for a complete Agda example. 
+
+Fortunately, there is already existing mechanism for such solvers in [Coq](http://adam.chlipala.net/cpdt/html/Reflection.html) and [Agda](https://www.staff.science.uu.nl/~swier004/Publications/EngineeringReflection.pdf) that doesn't involve type classes, namely reflection. Reflection returns a syntactic representation of the type of a hole or metavariable, which can be subsequently used to compute proofs. Thus, it's not painful to eschew reflection by type classes; also, natively supported reflection should be more convenient and performant than classes. 
+
+**Second**, 
+
+
+
+
+
 
 
 
