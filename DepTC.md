@@ -620,7 +620,7 @@ It's hard to overstate the sheer power of univalence.
 
 As an example, suppose that we implement unary natural numbers and the usual arithemtic operations. We also define binary numbers as an inductive type. Now, if we prove equivalence of the two representations, from any function that operates on unary numbers, we automatically get a new function operating on binary numbers such that *it preserves all semantic properties* of the original function, translated to the new representation. 
 
-In a sense, univalence is the ultimate constructive demonstration of subsitutability of equals; it lets us substitute equivalent types in any context, and spits out new proofs (implementations) automatically. 
+In a sense, univalence is the ultimate constructive demonstration of subsitutability of equals: it lets us substitute equivalent types in any context, and spits out new proofs (implementations) automatically. 
 
 Needless to say, univalence completely crushes any attempt of coherent type classes. 
 
