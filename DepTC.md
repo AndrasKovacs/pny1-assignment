@@ -209,10 +209,10 @@ Of course, coherence already implies that all derivations must agree. The diamon
 What makes coherent type classes such? Certainly, we should expect that strong guarantees are realized through restrictions, which is the case here:
 
 - All instances must be defined in instance declarations and cannot be passed around explicitly. Such explicit passing obviously contradicts coherence, since it allows creating instances from arbitrary values. 
-- The instance heads of a class must be disjunct and non-overlapping, provided that we allow modularity, i. e. different sets of instances visible in different modules. If we allow both modularity and overlapping then it could be the case that a module defines a more specific overlapping instance than another module, and thus two different runtime instances may end up in the program. On the other hand, overlapping instances could be made coherent if we give up modularity, i. e. mandate a single globally consistent set of instances, but this option isn't practical in any realistic module system. 
+- The instance heads of a class must be disjoint and non-overlapping, provided that we allow modularity, i. e. different sets of instances visible in different modules. If we allow both modularity and overlapping then it could be the case that a module defines a more specific overlapping instance than another module, and thus two different runtime instances may end up in the program. On the other hand, overlapping instances could be made coherent if we give up modularity, i. e. mandate a single globally consistent set of instances, but this option isn't practical in any realistic module system. 
 - There must be no "orphan instances", i. e. instances such that their classes aren't declared in the module of the instance, and the types in their heads aren't defined in the module either. In the presence of orphan instances we could just define two different orphan instances in different modules, then export them wrapped in a runtime box, to be used in a single module - destroying coherence.
 
-Backtracking instance resolution is also incompatible with coherence and modularity. Disjunct instance heads eliminate non-determinism in instance matching, so the only remaining point for backtracking choice would be instance constraints. In pseudo-Haskell:
+Backtracking instance resolution is also incompatible with coherence and modularity. Disjoint instance heads eliminate non-determinism in instance matching, so the only remaining point for backtracking choice would be instance constraints. In pseudo-Haskell:
 
 ```haskell
 instance (Ord a || Eq a) => Foo a where ...
@@ -504,7 +504,7 @@ Now we can write a function with type `(n : Nat) -> n + 0 ≡ n` ([see proof](ht
 
 With type classes, propositional equality becomes important when matching instance heads. Recall from section 2.4 that coherent type classes must have disjunct instance heads. We refine this to the following:
 
-> **Coherent type classes must have propositionally disjunct heads.**
+> **Coherent type classes must have propositionally disjoint heads.**
 
 Consider a class has two instances that are inequal definitionally, but equal propositionally:
 
