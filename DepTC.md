@@ -341,9 +341,9 @@ In proof writing, very frequently the operational semantics or performance of co
 
 However, we would like to ultimately integrate software development and proof writing seamlessly. Currently, Coq and Agda are very cumbersome for software development, and Haskell is very cumbersome and unreliable for proof writing. Designing type classes for an integrated environemnt would require a careful balancing act or provision of orthogonal search techniques for proof and program writing. Some of this will be discussed later. 
 
-#### 3. Advanced language features versus type classes
+#### 3. Alternatives to type classes
 
-In this section we examine whether some advances features and techniques could make type classes superfluous. 
+In this section I examine whether some advances features and techniques could make type classes superfluous. I single out features such that I have in the past encountered people characterizing them as alternatives to classes (though I cannot provide specific references to where I've read such things). 
 
 ##### 3.1. Generic programming
 
@@ -660,5 +660,19 @@ However, many types are not propositional, and it's very hard to make them so by
 Some types are propositional, but can't be easily proven so, because the proofs rely on parametricity which is usually inexpressible inside the language. For example, `{A : Set} → A → A` and the class `Functor` are propositional. 
 
 "If you rely on a property, why don't you specify it in types?" is a valid retort to proponents of coherence. Dependent types let us specify almost all relevant semantic properties. But sometimes the cost of specification and proving is too high, and we would rather just write and push out working code as quickly as possible. Of course, it's not a binary question of writing proofs or not. If we specify more precisely, our code gets more resilient to any kind of bugs, including those that may result from class incoherence. 
+
+#### 6. Conclusion
+
+Wrapping up our main points:
+
+- Type classes are very effective at introducing code generation and boilerplate removal in a way that is intuitive and lends itself easily to software abstraction.
+- Proposed alternatives to type classes fall short of providing the same set of benefits. 
+- Class coherence is important, especially in the context of software development.
+- However, maintaining coherence gets more difficult as we switch to more expressive languages, and it becomes outright infeasible when we get to univalent type theories. 
+- Precise specification offsets fragility introduced by incoherent classes. 
+
+As to future research, I briefly mentioned in section 2.1. that *constrained search* could denote a wide range of solutions, which wouldn't necessarily be similar to type classes. For example, SMT solvers used in refinement type systems can be also viewed as a tool for constrained search. It would be interesting to try come up with radically different designs. 
+
+Also, it would be a fun and useful project to formalize class coherence, preferably in some existing machine-checked system, but it would be good if we had any sort of formal model. Currently, type classes are viewed (rightfully) as a theoretically ad-hoc preprocessing stage before translating frontend code to elegant and small core type theories. I also don't know of any formalization effort, and as of recently even [experts](http://cstheory.stackexchange.com/questions/12524/a-mathematical-categorical-description-of-type-classes) were like me in this regard.
 
 
