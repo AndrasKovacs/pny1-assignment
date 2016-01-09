@@ -135,13 +135,11 @@ On another note, type classes also have a favorable weight-to-power ratio in ter
 
 > Current dependently typed languages tend to have an *excess* of static information that is largely ignored by backends, because there hasn't been yet relevant research in this area, or there hasn't been need for that much performance.
 
-##### 2.4 Coherent type classes
+##### 2.4. Coherent type classes
 
 Let's start off by defining coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
-
-(TODO: src on this coherence)
 
 Let's provide some backgrouond exaplanation. Runtime instances are just records of values and functions, similar to virtual tables in C++ (provided that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
 
@@ -231,7 +229,7 @@ instance Eq a => Foo a where ...
 
 There is some variation in the handling of overlapping and orphan instances in languages with coherent classes. GHC Haskell allows orphan instances (with compile-time warnings), and one can also enable overlapping instances through a compiler pragma. Rust disallows both.
 
-##### 2.5 Incoherent type classes
+##### 2.5. Incoherent type classes
 
 Incoherent classes have their own set of advantages: they can be considerably more flexible.
 
@@ -323,7 +321,7 @@ In the absence of coherence, `Map`-s must either
 
 The first solution has significant drawbacks. Algorithms that require having the same ordering for two containers (for example, efficient set union) are impossible to implement. I find the second solution better and its complexity cost acceptable. An example for the second solution in the wild is C++ STL containers.
 
-##### 2.6 Comparing merits
+##### 2.6. Comparing merits
 
 What's the verdict on coherence, then? 
 
@@ -458,11 +456,11 @@ In general, methods for overloading and code abstraction should let us write cod
 
 It's a good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean.
 
-#### 4 Coherent classes in dependent languages
+#### 4. Coherent classes in dependent languages
 
 In dependent languages, the language of types and terms are the same. Given that types can be indexed or parametrized by values, values must be able to appear in instance heads. It's reasonable to allow class parameters that are values, or any terms indeed, therefore it might be better to speak of simply "classes". I'll still use "type classes" though, for consistence. 
 
-##### 4.1 Reviewing equality
+##### 4.1. Reviewing equality
 
 As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
 
@@ -520,7 +518,7 @@ instance Foo n       where foo = "B"
 
 In an open context with `n :: Nat`, instance resolution may give us a dictionary with type `Foo (n + 0)`, but we can coerce that to `Foo n` using the proof that `(n + 0) :~: n`. The coerced dictionary is inequal to the dictionary resulting from resolving `Foo n`. For this reason, Haskell prohibits type families (which are like functions on the type level) in instance heads. 
 
-##### 4.2 Preserving coherence
+##### 4.2. Preserving coherence
 
 In general, one can preserve coherence by restricting instance heads to a language fragment with decidable propositional equality. Haskell does exactly this: it has a first-order term language of (necessarily injective) type constructors. However, the same solution would be awkward in a dependent language, since many commonly used types are parametrized with functions, for instance [sigma types](https://en.wikipedia.org/wiki/Dependent_type#Dependent_pair_type). Let's review some potential solutions. 
 
@@ -540,7 +538,7 @@ This may seem a bit intrusive. It's also anti-modular in the sense that programm
 
 However, as we move up to type theories with more sophisticated equality, this option could become more viable.
 
-##### 4.3 Adding extensionality
+##### 4.3. Adding extensionality
 
 An obvious power-up would be adding function extensionality to the language. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensial type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf), and univalent type theories also have function extensionality (see on [page 144](https://hott.github.io/book/nightly/hott-online-1007-ga1d0d9d.pdf)). We'll discuss univalence later in more detail.
 
@@ -581,7 +579,7 @@ Other forms of extensionality are [propositional extensionality](https://ncatlab
 
 We shall say more about the Holy Grail of extensionality: univalence.
 
-##### 4.4 Univalence
+##### 4.4. Univalence
 
 Univalence can be described as "universe extensionality". Defining the concept:
 
@@ -631,17 +629,17 @@ The whole notion of `newtype` as it's in Haskell is futile now. Since newtypes i
 
 Before in section 2.2 I talked chidingly about types whose intended meaning is encoded in their names, instead promoting types that encode meaning in their structure. Univalence takes this ethos to its logical conclusion, stripping type definitions of all surface qualities and going right to their abstract core.
 
-#### 5 Taming incoherent classes
+#### 5. Taming incoherent classes
 
 We've seen that in the long term (i. e. with univalence) it might be not feasible to keep coherence. Let's review some solutions and factors that might make incoherence more palatable. 
 
-**First**, there's a family of types for which coherence is always assured, with any kind of search procedure. These are *irrelevant* or *propositional* types:
+There's a family of types for which coherence is always assured, with any kind of search procedure. These are *irrelevant* or *propositional* types:
 
 >**Propositional types** are types that have at most one element up to propositional equality.
 
 Class instances are just the product of the class methods, so if all methods are propositional, then the type of instances is also propositional - therefore the class is coherent. The question is: how many useful classes are propositional? 
 
-Actually, quite a few. Often, if we pin down the behavior and properties of a class precisely enough it becomes uniquely specified for each type. 
+Actually, quite a few. Often, if we pin down the properties of a class precisely enough it becomes uniquely specified.
 
 A classic example is decidable equality. While regular `A -> A -> Bool` equality admits many implementations, decidable equality  with type `(x y : A) → (x ≡ y) ∨ ((x ≡ y) → ⊥)` has an extensionally unique implementation ([see my proof here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/DecEqProp.agda). This means that we can have a `DecEq` class, and recover simple Boolean equality from decidable equality, or we could have both equalities as methods, and require a proof (a third method) that they agree with each other. 
 
@@ -653,88 +651,14 @@ data SquashFst (A B : Set) : Set where
   squash : ∀ (a a' b) → wrap (a , b) ≡ wrap (a' , b)  -- equality constructor
 ```
 
-`squash` makes the first elements irrelevant in determining equality of the wrapped pairs. We are then restricted (by the rules of HIT-s) to only write `f : SquashFst A B -> C` functions such that `∀ a a' b → f (wrap (a, b)) ≡ f (wrap (a', b))`, i. e. all functions must respect `squash`. Thus, `SquashFst` works like our usual Haskell `newtype` wrappers, except that it captures our intent far more precisely. 
+`squash` makes the first elements irrelevant in determining equality of the wrapped pairs. We are then restricted (by the rules of HIT-s) to only write `f : SquashFst A B -> C` functions such that `∀ a a' b → f (wrap (a, b)) ≡ f (wrap (a', b))`, i. e. all functions must respect `squash`. Thus, `SquashFst` works like our usual Haskell `newtype` wrappers, except that it captures our intent far more precisely.
 
+A striking property of propositional types is that *any* search and automation is safe to employ. In fact, search on propositional types is the defining and most important feature of refinement types, which is a promising area for lightweight program verification; see e. g. [Liquid Haskell](http://goto.ucsd.edu/~rjhala/liquid/haskell/blog/about/).
 
+However, many types are not propositional, and it's very hard to make them so by unique specification. For example, take the usual [`Traversable`](https://hackage.haskell.org/package/base-4.8.1.0/docs/Data-Traversable.html) class from Haskell. Technically, traversal in any linear order is lawful, but we certainly don't want to mix together forwards and reverse traversals haphazardly in our code (which might be the case with incoherent `Traversable` instances lying around). However, specifying traversal order is difficult and requires complicated setup. 
 
+Some types are propositional, but can't be easily proven so, because the proofs rely on parametricity which is usually inexpressible inside the language. For example, `{A : Set} → A → A` and the class `Functor` are propositional. 
 
-
-
-
-
-
-
-
-
-
-
-
-
---------------------------------
-
-
-##### 2.3. Coherent versus incoherent classes
-
-- coherence in programming languages vs coherence in proof assistants
-- We'll consider coherence as important point later in dep types. 
-
-#### Back a bit to code gen
-
-- Code /= program. There is a mapping from code to program ("elaboration"). 
-- The compiler fills in details that follow from the semantics expressed in the source code.
-- The mapping should be easy to reason about.
-- There should be no arbitrary choices and choices that depend on source code non-compositionally
-
-- Types of program inference:
-   - as extension of type inference: based on type dependencies. Completely unambiguous.
-   - Proof search: based on searching contexts. Instance resolution a special case.
-
-- When is it safe to do arbitrary search? Irrelevant (propositional types)
-   - We can throw anything at irrelevant types. SMT is nice. 
-   
-#### Throw dep types and first-class modules in
-
-- Are classes still needed? 
-    - at least *some* mechanism that emulates math's "convention of notation" should be available
-    - first class modules as alternative
-    - generic prog as alternative
-- What about coherence:
-    - Problem: undecidable propositional apartness!
-        - solutions:
-          - proof obligations of apartness (I sort of like it)
-          - restriction of language fragment in instance heads  (like current GHC)
-          - restriction of usage of instances
-    - more problems: univalent / observational type theories
-    - How to provide internal proof of coherence?
-       - I have no idea. Need some simple Agda model. 
-- Instead of coherence
-    - Use propositional classes
-        - technique: refine classes until they are propositional 
-           - example: Eq vs DecEq
-              - but what bout bigger eqv. relations for Eq instance?
-                 - just use (higher inductive) quotient newtypes, lol
-    - encode relevant info in types, make coherence redundant
-      - but what about Monad, Traversable etc? Don't want to suddenly traverse backwards
-      - It's very complicated to encode traversal order, plus it screws up all existing infrastructure
-    - What solutions are there that forgo coherence but still provide enough reliability?
-      - some kind of local instance scoping? But we could do first class module opening instead.
-         
-    
-##### 3. More generally on code generation: 
-  - methods of code generation: 
-      - program inference
-      - proofs search: ad-hoc, instance-guided
-      - irrelevant types: the class of types for which automatic search is always permissible. 
-  - What do we talk about when we talk about writing programs?
-      - mcbride's post-HM vision:
-          - write types, then syntetise programs
-          - compute types from data and programs
-          - 
-      - We don't write proof terms, we write
-          - programs that output proof terms when we run them
-          - inputs to programs that output proof terms
-
-
-
+"If you rely on a property, why don't you specify it in types?" is a valid retort to proponents of coherence. Dependent types let us specify almost all relevant semantic properties. But sometimes the cost of specification and proving is too high, and we would rather just write and push out working code as quickly as possible. Of course, it's not a binary question of writing proofs or not. If we specify more precisely, our code gets more resilient to any kind of bugs, including those that may result from class incoherence. 
 
 
