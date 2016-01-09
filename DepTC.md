@@ -526,7 +526,7 @@ In general, one can preserve coherence by restricting instance heads to a langua
 
 **First**, if our language doesn't have [function extensionality](https://ncatlab.org/nlab/show/function+extensionality), then we have considerable amount leeway to use functions, since in this case definitional equality of functions coincides with propositional equality. The only expressions with undecidable propositional equality are *open expressions with non-function types containing function applications*. 
 
-For example, if `f` and `g` are top level functions, then `f` and `g` are OK in instance heads. `f x` is also OK if `f x` still has a function type (it's an unsaturated application) and `x` is OK as an expression. On the other hand, `n + 0` is not OK, since it has a value type (`Nat`), and it contains a function. 
+For example, if `f` and `g` are top level functions, then `f` and `g` are OK in instance heads. `f x` is also OK if `f x` still has a function type (it's an unsaturated application) and `x` is OK as an expression. On the other hand, `n + 0` is not OK, since it has a value type (`Nat`), and it contains a function application. 
 
 Restricting instance heads in this manner seems a good compromise. From the top of my head, I can't think of a useful type that would be exiled from classes. We lose one use case though, namely reflection of open expressions, which can be convenient for automatic solvers. 
 
@@ -536,11 +536,11 @@ Fortunately, there is already native reflection support for such solvers in [Coq
 
 **Second**, we can require proofs of propositional disjointness from programmers. In other words, the compiler tries to prove disjointness of instances by some incomplete procedure, and demands a proof from the programmer if it gets stuck. 
 
-This may seem a bit intrusive. It's also anti-modular in sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick the the previous solution in this section? 
+This may seem a bit intrusive. It's also anti-modular in the sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially considering that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick the the previous solution in this section? 
 
 However, as we move up to type theories with more sophisticated equality, this option could become more viable.
 
-#### 4.3 High-powered type theories
+##### 4.3 Adding extensionality
 
 An obvious power-up would be adding function extensionality to the language. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensial type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf), and univalent type theories also have function extensionality (see on [page 144](https://hott.github.io/book/nightly/hott-online-1007-ga1d0d9d.pdf)). We'll discuss univalence later in more detail.
 
@@ -580,6 +580,59 @@ codata StreamEq {a : Type} : Stream a -> Stream a -> Type where
 Other forms of extensionality are [propositional extensionality](https://ncatlab.org/nlab/show/propositional+extensionality) and [quotient types](https://en.wikipedia.org/wiki/Quotient_type), which I shall not discuss in detail here. Let it be said that they are nice things that we would like to have in our type theory, but they also make propositional equality less decidable.
 
 We shall say more about the Holy Grail of extensionality: univalence.
+
+##### 4.4 Univalence
+
+Univalence can be described as "universe extensionality". Defining the concept:
+
+- Two `A` and `B` types are equvalent if there exists `f : A -> B` and `g : B -> A` functions that are each other's inverses.
+- A universe of types is univalent if from each `A ~ B` equivalence we can derive an `A ≡ B` proof of propositional equality.
+
+In Agda notation (ignoring universe levels):
+
+```agda
+
+open import Data.Product
+open import Relation.Binary.PropositionalEquality
+
+Eqv : Set → Set → Set
+Eqv A B =
+  ∃ λ (f : A → B) → ∃ λ (g : B → A)
+  → (∀ a → g (f a) ≡ a) × (∀ b → f (g b) ≡ b)
+  
+univalence : Set₁
+univalence = ∀ {A B} → Eqv A B → A ≡ B
+```
+
+More succinctly, the univalence axiom says that equivalence is equivalent to equality. From equality we can trivially derive equivalence:
+
+```agda
+idToEqv : ∀ {A B} → A ≡ B → Eqv A B
+idToEqv refl = (λ x → x) , (λ x → x) , (λ x → refl) , (λ x → refl)
+```
+
+Univalence completes the equivalence in the other direction. 
+
+Intensional type theory together with univalence as axiom can be viewed as a formalization of homotopy theory. A good comprehensive introduction to the subject can be found in the [Homotopy Type Theory book](http://homotopytypetheory.org/book/). 
+
+Note that working with equality proofs in univalent theories can involve a significant amount of computation. In plain old type theories, equality proofs can be usually erased from runtime, since they express that two objects are represented by literally the same pattern of bytes (in intensional type theory) or that objects are computationally indistinguishable from inside the system (when we add various forms of extensionality). With univalence, there can be many different proofs that `A ≡ B`, since there can be many different equivalences between types. Also, there is non-trivial machinery that makes use of the computational content of equality proofs to generate new implementations whenever we use equalities to coerce values or substitute types within types. 
+
+For a while it's been an open problem whether it's possible at all to implement such machinery. Currently, there is research in [cubical type theory](http://www.math.ias.edu/~amortberg/papers/cubicaltt.pdf) that demonstrates that effective computation with univalence is possible, and also some [experimental implementation](https://github.com/mortberg/cubicaltt). Thus, there is reason to believe that a practical implementation of univalent type theory will eventually emerge.  
+
+It's hard to overstate the sheer power of univalence. 
+
+As an example, suppose that we implement unary natural numbers and the usual arithemtic operations. We also define binary numbers as an inductive type. Now, if we prove equivalence of the two representations, from any function that operates on unary numbers, we automatically get a new function operating on binary numbers such that *it preserves all semantic properties* of the original function, translated to the new representation. 
+
+In a sense, univalence is the ultimate constructive demonstration of subsitutability of equals; it lets us substitute equivalent types in any context, and spits out new proofs (implementations) automatically. 
+
+Needless to say, univalence completely crushes any attempt of coherent type classes. 
+
+The whole notion of `newtype` as it's in Haskell is futile now. Since newtypes introduce isomorphic types, they also introduce equal types here. Any type with a countable infinite number of elements is now equal to natural numbers - so we can't define different instances for them. We can't define different `Show` instances for `BinaryTree Nat` and `List Nat`. Generally, with any defined type we define a whole equivalence class of types, of which our definition is a representative.
+
+Before in section 2.2 I talked chidingly about types whose intended meaning is encoded in their names, instead promoting types that encode meaning in their structure. Univalence takes this ethos to its logical conclusion, stripping type definitions of all surface qualities and going right to their abstract core.
+
+#### 5 Taming incoherent classes
+
 
 
 
