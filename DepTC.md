@@ -458,7 +458,7 @@ In general, methods for overloading and code abstraction should let us write cod
 
 It's a good idea though to have higher-order modules and type classes at the same time, and indeed it's done so in Agda, Coq and Lean.
 
-#### 4 Type classes in dependent languages
+#### 4 Coherent classes in dependent languages
 
 In dependent languages, the language of types and terms are the same. Given that types can be indexed or parametrized by values, values must be able to appear in instance heads. It's reasonable to allow class parameters that are values, or any terms indeed, therefore it might be better to speak of simply "classes". I'll still use "type classes" though, for consistence. 
 
@@ -522,19 +522,65 @@ In an open context with `n :: Nat`, instance resolution may give us a dictionary
 
 ##### 4.2 Preserving coherence
 
-In general, one can preserve coherence by restricting instance heads to a language fragment with decidable propositional equality. Haskell does exactly this: it has a first-order term language of (necessarily injective) type constructors. However, the same language in instance heads would be awkward in a dependent language, since many commonly used types are parametrized with functions, for instance [sigma types](https://en.wikipedia.org/wiki/Dependent_type#Dependent_pair_type). Let's review some potential solutions. 
+In general, one can preserve coherence by restricting instance heads to a language fragment with decidable propositional equality. Haskell does exactly this: it has a first-order term language of (necessarily injective) type constructors. However, the same solution would be awkward in a dependent language, since many commonly used types are parametrized with functions, for instance [sigma types](https://en.wikipedia.org/wiki/Dependent_type#Dependent_pair_type). Let's review some potential solutions. 
 
 **First**, if our language doesn't have [function extensionality](https://ncatlab.org/nlab/show/function+extensionality), then we have considerable amount leeway to use functions, since in this case definitional equality of functions coincides with propositional equality. The only expressions with undecidable propositional equality are *open expressions with non-function types containing function applications*. 
 
 For example, if `f` and `g` are top level functions, then `f` and `g` are OK in instance heads. `f x` is also OK if `f x` still has a function type (it's an unsaturated application) and `x` is OK as an expression. On the other hand, `n + 0` is not OK, since it has a value type (`Nat`), and it contains a function. 
 
-Restricting instance heads in this manner seems a good compromise. From the top of my head, I can't think of a useful type that would be exiled from classes. We use one use case though, namely reflection of open expressions, which can be convenient for automatic solvers. 
+Restricting instance heads in this manner seems a good compromise. From the top of my head, I can't think of a useful type that would be exiled from classes. We lose one use case though, namely reflection of open expressions, which can be convenient for automatic solvers. 
 
 For example, we might want to use [proof by reflection](http://adam.chlipala.net/cpdt/html/Reflection.html) for solving equations on monoids. It consists of taking equations like `a * ((b * 0) * c) = a * (0 * (b * c))`, normalizing both sides by reassociating operations and eliminating identities, then checking for definitional equality. We could implement this using classes by writing one instance for one normalization rule, while simultaneously building a proof that the normal form is equal to the original expression. See [this file](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassySolver.agda) for a complete Agda example. 
 
-Fortunately, there is already existing mechanism for such solvers in [Coq](http://adam.chlipala.net/cpdt/html/Reflection.html) and [Agda](https://www.staff.science.uu.nl/~swier004/Publications/EngineeringReflection.pdf) that doesn't involve type classes, namely reflection. Reflection returns a syntactic representation of the type of a hole or metavariable, which can be subsequently used to compute proofs. Thus, it's not painful to eschew reflection by type classes; also, natively supported reflection should be more convenient and performant than classes. 
+Fortunately, there is already native reflection support for such solvers in [Coq](http://adam.chlipala.net/cpdt/html/Reflection.html) and [Agda](https://www.staff.science.uu.nl/~swier004/Publications/EngineeringReflection.pdf). Reflection returns a syntactic representation of the type of a hole or metavariable, which can be subsequently used to compute proofs. Thus, it's not painful to eschew reflection by type classes; also, natively supported reflection should be more convenient and performant than classes. 
 
-**Second**, 
+**Second**, we can require proofs of propositional disjointness from programmers. In other words, the compiler tries to prove disjointness of instances by some incomplete procedure, and demands a proof from the programmer if it gets stuck. 
+
+This may seem a bit intrusive. It's also anti-modular in sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick the the previous solution in this section? 
+
+However, as we move up to type theories with more sophisticated equality, this option could become more viable.
+
+#### 4.3 High-powered type theories
+
+An obvious power-up would be adding function extensionality to the language. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensial type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf), and univalent type theories also have function extensionality (see on [page 144](https://hott.github.io/book/nightly/hott-online-1007-ga1d0d9d.pdf)). We'll discuss univalence later in more detail.
+
+Now, functions can *never* appear in instance heads, simply because any function can be proven equal to another by extensionality. This is a rather serious limitation, and it makes it all the more appealing to require proofs of disjointness. 
+
+There are other forms of extensionality. If our language support codata and coinduction, then it might as well support extensionality for codata. In languages without such extensionality, values of codata are equal if they are definitionallly equal. For example, an infinite stream of repeated numbers is only definitionally equal to itself, but actually it's equal to any suffix of itself. 
+
+```idris
+-- pseudo-Idris
+codata Stream : Type -> Type where
+  Cons : a -> Stream a -> Stream a
+  
+head : Stream a -> a
+head (Cons a as) = a
+
+drop : Int -> Stream a -> Stream a
+drop n as | n <= 0 = as
+drop n (Cons a as) = drop (n - 1) as
+
+ones : Stream Int
+ones = Cons 1 ones
+
+ones' : Stream Int
+ones' = drop 10 ones -- equal to "ones", but we can't prove this
+```
+
+We can define stream equality as a stream of equalities, or bisimulation:
+
+```idris
+codata StreamEq {a : Type} : Stream a -> Stream a -> Type where
+  Cons : 
+    {x : a} -> {y : a} -> {xs : Stream a} -> {ys : Stream a} 
+    -> x = y -> StreamEq a xs ys -> StreamEq a (Cons x xs) (Cons y ys)
+```
+`StreamEq xs ys` supplies pairwise equality proofs for all elements. However, it's not as nearly convenient as full propositional equality, because it's not substitutive, and also we have to define types like `StreamEq` over and over for different codata. Codata extensionality allows us to derive propositional equality from bisimulations. Similarly as with function extensionality, codata extensionality makes disjointness of instance heads with codata undecidable. 
+
+Other forms of extensionality are [propositional extensionality](https://ncatlab.org/nlab/show/propositional+extensionality) and [quotient types](https://en.wikipedia.org/wiki/Quotient_type), which I shall not discuss in detail here. Let it be said that they are nice things that we would like to have in our type theory, but they also make propositional equality less decidable.
+
+We shall say more about the Holy Grail of extensionality: univalence.
+
 
 
 
