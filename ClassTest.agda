@@ -1,5 +1,3 @@
-module ClassTest where
-
 open import Data.Nat
 open import Relation.Binary.PropositionalEquality
 
@@ -34,10 +32,10 @@ module _ (n : ℕ) where
     barB = record { bar = 1 }
 
   b : ℕ
-  b = foo 0
+  b = foo 1 -- unsolved meta, however it becomes solved if we remove "fooB"
 
   a : ℕ
-  a = foo (n + 0)
+  a = foo (n + 0) -- unsolved meta
 
   c : ℕ
   c = bar _+_
