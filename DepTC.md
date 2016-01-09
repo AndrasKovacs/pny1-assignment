@@ -582,7 +582,7 @@ We shall say more about the Holy Grail of extensionality: univalence.
 
 Univalence can be described as "universe extensionality". Defining the concept:
 
-- Two `A` and `B` types are equvalent if there exists `f : A -> B` and `g : B -> A` functions that are each other's inverses.
+- Two `A` and `B` types are equivalent if there exist `f : A -> B` and `g : B -> A` functions that are each other's inverses.
 - A universe of types is univalent if from each `A ~ B` equivalence we can derive an `A ≡ B` proof of propositional equality.
 
 In Agda notation (ignoring universe levels):
