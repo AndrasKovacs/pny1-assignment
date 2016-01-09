@@ -461,7 +461,7 @@ In dependent languages, the language of types and terms are the same. Given that
 
 ##### 4.1. Reviewing equality
 
-As I mentioned in the introduction, no current dependently typed language implement coherent type classes as of now. To see why, let's review and expand the definition of coherence:
+As I mentioned in the introduction, no dependently typed language implements coherent type classes as of now. To see why, let's review and expand the definition of coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
 
