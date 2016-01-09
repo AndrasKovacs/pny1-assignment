@@ -272,7 +272,7 @@ multMonoid = record {mempty = 1; mappend = _*_}
 
 ```
 
-With coherent instances, we're forced to have only one instance for an instance head, even when there could be plausibly more. In Haskell, multiple instances are handled through "newtype-s", i. e. unary wrappers without runtime cost that introduce strongly-typed aliases.
+With coherent instances, we're forced to have only one instance for an instance head, even when there could be plausibly more. In Haskell, multiple instances are handled through "newtype"-s, i. e. unary wrappers without runtime cost that introduce strongly-typed aliases.
 
 ```haskell
 newtype Sum a = Sum a
