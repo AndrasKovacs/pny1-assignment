@@ -673,6 +673,6 @@ Wrapping up our main points:
 
 As to future research, I briefly mentioned in section 2.1. that *constrained search* could denote a wide range of solutions, which wouldn't necessarily be similar to type classes. For example, SMT solvers used in refinement type systems can be also viewed as a tool for constrained search. It would be interesting to try come up with radically different designs. 
 
-Also, it would be a fun and useful project to formalize class coherence, preferably in some existing machine-checked system, but it would be good if we had any sort of formal model. Currently, type classes are viewed (rightfully) as a theoretically ad-hoc preprocessing stage before translating frontend code to elegant and small core type theories. I also don't know of any formalization effort, and as of recently even [experts](http://cstheory.stackexchange.com/questions/12524/a-mathematical-categorical-description-of-type-classes) were like me in this regard.
+Also, it would be a fun and useful project to formalize class coherence, preferably in some existing machine-checked system, but it would be good if we had any sort of formal model. Currently, type classes are viewed (rightfully) as a theoretically ad-hoc preprocessing stage before translating frontend code to elegant and small core type theories. I also don't know of any formalization effort, and as of recently even [experts](http://cstheory.stackexchange.com/a/12530/22548) were like me in this regard.
 
 
