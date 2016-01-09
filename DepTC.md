@@ -567,7 +567,7 @@ ones' : Stream Int
 ones' = drop 10 ones -- equal to "ones", but we can't prove this
 ```
 
-We can define stream equality as a stream of equalities, or bisimulation:
+We can define stream equality as a stream of equalities (bisimulation):
 
 ```idris
 codata StreamEq {a : Type} : Stream a -> Stream a -> Type where
