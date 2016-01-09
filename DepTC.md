@@ -684,7 +684,7 @@ In [Agda](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassTest.
 
 In [Coq](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassTest.v), I found that the language has pretty robust instance resolution (which is borrowed wholesale from the pre-existing tactics langauge), but also that it's very "trigger-happy" and silently solves even badly-behaved and silly examples, such as the `Foo` class in my example files. 
 
-I have not played around with the [Lean](http://leanprover.github.io/) prover. It might worth a look, especially since Lean prides itself on very fast instance resolution that is organically integrated into the elaborator.  
+I have not played around with the [Lean](http://leanprover.github.io/) prover. It might be worth a look, especially since Lean prides itself on very fast instance resolution that is organically integrated into the elaborator.  
 
 
 
