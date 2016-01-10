@@ -539,7 +539,7 @@ However, as we move up to type theories with more sophisticated equality, this o
 
 ##### 4.3. Adding extensionality
 
-An obvious power-up would be adding function extensionality to our language. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensional type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf), and univalent type theories also have function extensionality (see on [page 144](https://hott.github.io/book/nightly/hott-online-1007-ga1d0d9d.pdf)). We'll discuss univalence later in more detail.
+An obvious power-up would be adding function extensionality to our language. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensional type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf), and univalent type theories also have function extensionality (see on [page 144](http://saunders.phil.cmu.edu/book/hott-online.pdf)). We'll discuss univalence later in more detail.
 
 Now, functions can *never* appear in instance heads, simply because any function can be proven equal to another by extensionality. This is a rather serious limitation, and it makes it all the more appealing to require proofs of disjointness. 
 
