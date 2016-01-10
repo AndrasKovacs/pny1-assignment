@@ -1,5 +1,5 @@
 
--- proof that decidable equality is propositional (assuming fun. ext.)
+-- proof that decidable equality is propositional (assuming fun. ext. + axiom K)
 
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
