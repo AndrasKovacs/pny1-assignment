@@ -1,5 +1,5 @@
 
-### The future of type classes in (dependently typed) programming
+### The future of type classes in dependently typed programming
 
 
 #### 1. Introduction
