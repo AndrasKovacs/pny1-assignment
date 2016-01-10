@@ -469,9 +469,9 @@ However, the exact notion of equality is very important here, both of types and 
 
 In type theories we usually consider two concepts of equality (for a short alternative overview, see [Gratzer](http://jozefg.bitbucket.org/posts/2014-08-06-equality.html)).
 
-*Definitional equality* is the kind of equality that is decidable by the type checker. For example, whenever we have a function application `(f x)`, the type checker must be able to decide the the input type of `f` is equal to the type of `x`. 
+*Definitional equality* is the kind of equality that is decidable by the type checker. For example, whenever we have a function application `(f x)`, the type checker must be able to decide that the input type of `f` is equal to the type of `x`. 
 
-*Propositional equality* is can be proved inside the language and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. experssions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral (in a total language):
+*Propositional equality* is can be proved inside the language and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. expressions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral (in a total language):
 
 ```agda
 (3 + 4 + 0) -- reduces to 7
@@ -529,11 +529,11 @@ Restricting instance heads in this manner seems a good compromise. From the top 
 
 For example, we might want to use [proof by reflection](http://adam.chlipala.net/cpdt/html/Reflection.html) for solving equations on monoids. It consists of taking equations like `a * ((b * 0) * c) = a * (0 * (b * c))`, normalizing both sides by reassociating operations and eliminating identities, then checking for definitional equality. We could implement this using classes by writing one instance for one normalization rule, while simultaneously building a proof that the normal form is equal to the original expression. See [this file](https://github.com/AndrasKovacs/pny1-assignment/blob/master/ClassySolver.agda) for a complete Agda example. 
 
-Fortunately, there is already native reflection support for such solvers in [Coq](http://adam.chlipala.net/cpdt/html/Reflection.html) and [Agda](https://www.staff.science.uu.nl/~swier004/Publications/EngineeringReflection.pdf). Reflection returns a syntactic representation of the type of a hole or metavariable, which can be subsequently used to compute proofs. Thus, it's not painful to eschew reflection by type classes; also, natively supported reflection should be more convenient and performant than classes. 
+Fortunately, there is already native reflection support for such solvers in [Coq](http://adam.chlipala.net/cpdt/html/Reflection.html) and [Agda](https://www.staff.science.uu.nl/~swier004/Publications/EngineeringReflection.pdf). Reflection returns a syntactic representation of the type of a hole or metavariable, which can be subsequently used to compute proofs. Thus, it's not painful to eschew reflection by type classes. Also, natively supported reflection should be more convenient and performant than classes. 
 
 **Second**, we can require proofs of propositional disjointness from programmers. In other words, the compiler tries to prove disjointness of instances by some incomplete procedure, and demands a proof from the programmer if it gets stuck. 
 
-This may seem a bit intrusive. It's also anti-modular in the sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially considering that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick the the previous solution in this section, that with the restriction on instance heads? 
+This may seem a bit intrusive. It's also anti-modular in the sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially considering that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick with the previous solution in this section and restrict the instance heads?
 
 However, as we move up to type theories with more sophisticated equality, this option could become more viable.
 
@@ -543,7 +543,7 @@ An obvious power-up would be adding function extensionality to our language. Thi
 
 Now, functions can *never* appear in instance heads, simply because any function can be proven equal to another by extensionality. This is a rather serious limitation, and it makes it all the more appealing to require proofs of disjointness. 
 
-There are other forms of extensionality. If our language supports codata and coinduction, then it could as well support extensionality for codata. In languages without such extensionality, values of codata are equal if they are definitionallly equal. For example, an infinite stream of repeated numbers is definitionally equal only to itself, but actually it's equal to any suffix of itself. 
+There are other forms of extensionality. If our language supports codata and coinduction, then it could as well support extensionality for codata. In languages without such extensionality, values of codata are equal if they are definitionallly equal. For example, an infinite stream of repeated numbers is definitionally equal only to itself, but it's observationally equal to any suffix of itself. 
 
 ```idris
 -- pseudo-Idris
@@ -612,7 +612,7 @@ Univalence completes the equivalence in the other direction.
 
 Intensional type theory together with univalence as axiom can be viewed as a formalization of homotopy theory. A good comprehensive introduction to the subject can be found in the [Homotopy Type Theory book](http://homotopytypetheory.org/book/). 
 
-Note that working with equality proofs in univalent theories can involve a significant amount of computation. In plain old type theories, equality proofs can be usually erased from runtime, since they express that two objects are represented by literally the same pattern of bytes (in intensional type theory) or that objects are computationally indistinguishable from within the system (when we add various forms of extensionality). With univalence, there can be many different proofs that `A ≡ B`, since there can be many different equivalences between types. Also, there is non-trivial machinery that makes use of the computational content of equality proofs to generate new implementations whenever we use equalities to coerce values or substitute types within types. 
+Note that working with equality proofs in univalent theories can involve a significant amount of computation. In plain old type theories, equality proofs can be usually erased from runtime, since they express that two objects are represented by literally the same pattern of bytes (in intensional type theory) or that objects are computationally indistinguishable from within the system (when we add various forms of extensionality). With univalence, there can be many different proofs for `A ≡ B`, since there can be many different equivalences between types. For example we could use both `id` and `not` in a proof for `Bool ≡ Bool`.  Also, there is non-trivial machinery that makes use of the computational content of equality proofs to generate new implementations whenever we use equalities to coerce values or substitute types within types. 
 
 For a while it's been an open problem whether it's possible at all to implement such machinery. Currently, there is research in [cubical type theory](http://www.math.ias.edu/~amortberg/papers/cubicaltt.pdf) that demonstrates that effective computation with univalence is possible, and also some [experimental implementation](https://github.com/mortberg/cubicaltt). Thus, there is good reason to believe that a practical implementation of univalent type theory will eventually emerge.  
 
@@ -634,7 +634,7 @@ We've seen that in the long term (i. e. with univalence) it might be not feasibl
 
 There's a family of types for which coherence is always assured, independently from any search procedure. These are *irrelevant* or [*propositional*](https://ncatlab.org/nlab/show/mere+proposition) types:
 
->**Propositional types** are types that have at most one element up to propositional equality.
+>**Propositional types are types that have at most one element up to propositional equality.**
 
 Class instances are just a product of the class methods, so if all methods are propositional, then the type of instances is also propositional - therefore the class is coherent. The question is: how many useful classes are propositional? 
 
