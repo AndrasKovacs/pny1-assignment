@@ -471,7 +471,7 @@ In type theories we usually consider two concepts of equality (for a short alter
 
 *Definitional equality* is the kind of equality that is decidable by the type checker. For example, whenever we have a function application `(f x)`, the type checker must be able to decide that the input type of `f` is equal to the type of `x`. 
 
-*Propositional equality* is can be proved inside the language and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. expressions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral (in a total language):
+*Propositional equality* can be proved inside the language and can be used to prove properties or coerce values between equal types. Propositional and definitional equality usually coincide for *closed expressions*, i. e. expressions that contain no free variables. For example, all closed terms with natural number types must reduce to a specific numeral (in a total language):
 
 ```agda
 (3 + 4 + 0) -- reduces to 7
