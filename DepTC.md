@@ -376,7 +376,7 @@ In practical implementations of generic programming in Haskell, [Clean](http://c
 
 Turning back to type classes, can we expect that generic programming can replace them? 
 
-The answer is likely no. Generic programming does overlap with type classes, and it's usually a good choice in the overlapping cases (decidable equality, enumeration, serialization, etc.), but many classes are extremely hard to express generically. For example, instances for most algebraic structures cannot be derived mechanically. Natural numbers form a ring, but ring-ness can't be easily decided for arbitrary types.
+The answer is likely no. Generic programming does overlap with type classes, and it's usually a good choice in the overlapping cases (decidable equality, enumeration, serialization, etc.), but many classes are extremely hard to express generically. For example, instances for most algebraic structures cannot be derived mechanically. Integers form a ring, but ring-ness can't be easily decided for arbitrary types.
 
 Also, despite our best intentions a large amount of meaning and intent is expressed by the *naming* of types. Programmers often use isomorphic but differently named types, because most of the time there's no need or energy to express all relevant semantics in types. Thus, generics may be good for serialization, but not quite good for pretty printing, since generic functions don't know much about the context in which a type is used or the intent of the programmer. It's a common point of pain in programming languages that support some form of printing for all types: the printed outputs tend to be messy, verbose or uninformative. 
 
