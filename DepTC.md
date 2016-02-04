@@ -278,7 +278,7 @@ With coherent instances, we're forced to have only one instance for an instance 
 newtype Sum a = Sum a
 newtype Product a = Product a
 
-instance Num a => Monoid (Pls a) where
+instance Num a => Monoid (Sum a) where
   mempty = Sum 0
   mappend (Sum a) (Sum b) = Sum (a + b)
 
