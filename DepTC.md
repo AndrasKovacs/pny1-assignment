@@ -582,8 +582,8 @@ We shall say more about the Holy Grail of extensionality: univalence.
 
 Univalence can be described as "universe extensionality". Defining the concept:
 
-- Two `A` and `B` types are equivalent if there exist `f : A -> B` and `g : B -> A` functions that are each other's inverses.
-- A universe of types is univalent if from each `A ~ B` equivalence we can derive an `A ≡ B` proof of propositional equality.
+- `A ~ B` is the type of equivalence of `A` and ˙B` types, and its values are pairs of `f : A -> B` and `g : B -> A` functions along with the proofs that they're inverses. 
+- A universe of types is univalent if `A ~ B` is equivalent to `A ≡ B` for each `A` and `B` in the universe.
 
 In Agda notation (ignoring universe levels):
 
@@ -597,18 +597,14 @@ Eqv A B =
   ∃ λ (f : A → B) → ∃ λ (g : B → A)
   → (∀ a → g (f a) ≡ a) × (∀ b → f (g b) ≡ b)
   
+-- this is the trivial direction in the "(A ~ B) ~ (A ≡ B)" equivalence
+idToEqv : ∀ {A B} → A ≡ B → Eqv A B
+idToEqv refl = (λ x → x) , (λ x → x) , (λ x → refl) , (λ x → refl)
+
+-- this is the other direction, which must be taken as axiom in most current type theories
 univalence : Set₁
 univalence = ∀ {A B} → Eqv A B → A ≡ B
 ```
-
-More succinctly, the univalence axiom says that equivalence is equivalent to equality. From equality we can trivially derive equivalence:
-
-```agda
-idToEqv : ∀ {A B} → A ≡ B → Eqv A B
-idToEqv refl = (λ x → x) , (λ x → x) , (λ x → refl) , (λ x → refl)
-```
-
-Univalence completes the equivalence in the other direction. 
 
 Intensional type theory together with univalence as axiom can be viewed as a formalization of homotopy theory. A good comprehensive introduction to the subject can be found in the [Homotopy Type Theory book](http://homotopytypetheory.org/book/). 
 
@@ -622,11 +618,11 @@ As an example, suppose that we implement unary natural numbers and the usual ari
 
 In a sense, univalence is the ultimate constructive demonstration of subsitutability of equals: it lets us substitute equivalent types in any context, and spits out new proofs (implementations) automatically. 
 
-Needless to say, univalence completely crushes any attempt of coherent type classes. 
+Needless to say, univalence greatly interferes with type class coherence.
 
 The whole notion of `newtype` as it's in Haskell is futile now. Since newtypes introduce isomorphic types, they also introduce equal types here. Any type with a countably infinite number of elements is now equal to natural numbers - so we can't define different instances for them. We can't define different `Show` instances for `BinaryTree Nat` and `List Nat`. Generally, with any definition we define a whole equivalence class of types, of which our defined type is a representative.
 
-Before in section 2.2 I talked chidingly about types whose intended meaning is encoded in their names, instead promoting types that encode meaning in their structure. Univalence takes this ethos to its logical conclusion, stripping type definitions of all surface qualities and going right to their abstract core.
+Before in section 2.2 I talked chidingly about types whose intended meaning is encoded in their names, instead promoting types that encode meaning in their structure. Univalence takes this ethos to its logical conclusion, stripping type definitions of all surface qualities and going right to their abstract core, but in the process it also reduces our ability to dress up equal things differently.
 
 #### 5. Taming incoherent classes
 
@@ -640,7 +636,7 @@ Class instances are just a product of the class methods, so if all methods are p
 
 Actually, quite a few. Often, if we pin down the properties of a class precisely enough it becomes uniquely specified.
 
-A classic example is decidable equality. While regular `A -> A -> Bool` equality admits many implementations, decidable equality  with type `(x y : A) → (x ≡ y) ∨ ((x ≡ y) → ⊥)` has an extensionally unique implementation ([see my proof here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/DecEqProp.agda)). This means that we can have a `DecEq` class, and recover simple Boolean equality from decidable equality, or we could have both equalities as methods, and require a proof (a third method) that they agree with each other. 
+A classic example is decidable equality. While regular `A -> A -> Bool` equality admits many implementations, decidable equality with type `(x y : A) → (x ≡ y) ∨ ((x ≡ y) → ⊥)` has an extensionally unique implementation ([see my proof here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/DecEqProp.agda)). This means that we can have a `DecEq` class, and recover simple Boolean equality from decidable equality, or we could have both equalities as methods, and require a proof (a third method) that they agree with each other. 
 
 What about specialized equalities? In Haskell, people sometimes use `newtype` wrappers to provide alternative instances for common classes. For example we could have a syntax tree with labels and other metadata that we would like to ignore when computing equality. With decidable equality, we can't implement "forgetful" alternative instances, right? Well, we can, if we use some homotopy-flavored type theory with [higher inductive types](https://ncatlab.org/nlab/show/higher+inductive+type). Higher induction allows us to specify *equality* constructors for data types, along with the old constructors for values. For example, a HIT wrapper that "forgets" the first field of a tuple could be the following:
 
