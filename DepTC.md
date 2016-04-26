@@ -350,7 +350,7 @@ By "generic programming" I mean programming with closed type universes, which in
 
 The general idea is that we have *descriptions* or *codes* for datatypes inside the language, and we can use descriptions to guide computation on values of described types. Type universes are data types whose values are descriptions (although full-fledged universes require dependent typing).
 
-What makes type universes different from regular user-defined types in Haskell or Agda is that they are *closed* and *open for inspection*. Regular user-defined data types are more like axioms to the system, and yield opaque types with hidden structure. If we define natural numbers as
+What makes type universes different from regular user-defined types in Haskell or Agda is that they have a *closed collection of production rules* but are *open for inspection*. Regular user-defined data types are more like axioms to the system, and yield opaque types with hidden structure. If we define natural numbers as
 
 ```haskell
 data Nat = Zero | Succ Nat
