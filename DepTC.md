@@ -591,19 +591,26 @@ In Agda notation (ignoring universe levels):
 
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
+open import Level
 
-Eqv : Set → Set → Set
+Eqv : ∀ {α β} → Set α → Set β → Set (α ⊔ β)
 Eqv A B =
   ∃ λ (f : A → B) → ∃ λ (g : B → A)
   → (∀ a → g (f a) ≡ a) × (∀ b → f (g b) ≡ b)
   
 -- this is the trivial direction in the "(A ~ B) ~ (A ≡ B)" equivalence
-idToEqv : ∀ {A B} → A ≡ B → Eqv A B
+idToEqv : ∀ {α}{A B : Set α} → A ≡ B → Eqv A B
 idToEqv refl = (λ x → x) , (λ x → x) , (λ x → refl) , (λ x → refl)
 
--- this is the other direction, which must be taken as axiom in most current type theories
-univalence : Set₁
-univalence = ∀ {A B} → Eqv A B → A ≡ B
+-- The other direction along with the inverses' proofs.
+-- They must be taken as axioms in most current type theories
+postulate
+  ua     : ∀ {α}{A B : Set α} → Eqv A B → A ≡ B
+  toFrom : ∀ {α}{A B : Set α} → (e : Eqv A B) → idToEqv (ua e) ≡ e
+  fromTo : ∀ {α}{A B : Set α} → (e : A ≡ B) → ua (idToEqv e) ≡ e
+
+Univalence : ∀ {α}{A B : Set α} → Eqv (A ≡ B) (Eqv A B)
+Univalence = idToEqv , ua , fromTo , toFrom
 ```
 
 Intensional type theory together with univalence as axiom can be viewed as a formalization of homotopy theory. A good comprehensive introduction to the subject can be found in the [Homotopy Type Theory book](http://homotopytypetheory.org/book/). 
