@@ -84,7 +84,7 @@ As to the problem of specifications, programmers can manually implement instance
 
 Types are the primary carriers of information in static systems. It's desirable that we be able to make as much as possible use of this information, and do this *inside* the language. 
 
-Polymorhic (or "generic") data types generate a rich expression language, in contrast to monomorphic types. Consider the following data type:
+Polymorphic (or "generic") data types generate a rich expression language, in contrast to monomorphic types. Consider the following data type:
 
 ```haskell
 data PairOfInts = Pair Int Int
@@ -324,7 +324,7 @@ The first solution has significant drawbacks. Algorithms that require having the
 
 What's the verdict on coherence, then? 
 
-First, I posit that coherence has significant benefits in robustness and scalability, and thus I will henceforth consider it desirable in hypothetical languages. A good heuristic in programming and mathematics is to use the least powerful tool that gets the job done, because they tend to be simpler, easier to reason about, and also more generally applicable (that said, in software development we have a great number of tools that are complicated and weak at the same time).  
+I posit that coherence has significant benefits in robustness and scalability, and thus I will henceforth consider it desirable in hypothetical languages. A good heuristic in programming and mathematics is to use the least powerful tool that gets the job done, because they tend to be simpler, easier to reason about, and also more generally applicable (that said, in software development we have a great number of tools that are complicated and weak at the same time).  
 
 Still, there are many caveats and footnotes to this. 
 
