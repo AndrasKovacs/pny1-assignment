@@ -582,7 +582,7 @@ We shall say more about the Holy Grail of extensionality: univalence.
 
 Univalence can be described as "universe extensionality". Defining the concept:
 
-- `A ~ B` is the type of equivalence of `A` and ˙B` types, and its values are pairs of `f : A -> B` and `g : B -> A` functions along with the proofs that they're inverses. 
+- `A ~ B` is the type of equivalence of `A` and `B` types, and its values are pairs of `f : A -> B` and `g : B -> A` functions along with the proofs that they're inverses. 
 - A universe of types is univalent if `A ~ B` is equivalent to `A ≡ B` for each `A` and `B` in the universe.
 
 In Agda notation (ignoring universe levels):
