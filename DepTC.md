@@ -141,7 +141,7 @@ Let's start off by defining coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
 
-Let's provide some backgrouond exaplanation. Runtime instances are just records of values and functions, similar to virtual tables in C++ (provided that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
+Let's provide some background exaplanation. Runtime instances are just records of values and functions, similar to virtual tables in C++ (provided that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
 
 ```haskell
 f :: Eq a => a -> a -> a -> a
