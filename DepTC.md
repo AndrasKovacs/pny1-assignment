@@ -125,7 +125,7 @@ class Pair<A extends Eq<A>, B extends Eq<B>> implements Eq<Pair<A, B>> {
 
 But this largely defeats the purpose, since now `Pair` itself is restricted to `Eq` fields. It's still true in Java and Eiffel that there is a straightforward `eq` method implementation for `Pair` whenever the fields also implement `eq`, but that implementation must be written out each time, or abstracted as a higher-order function with `Comparator` inputs, which also requires manual plumbing on use sites. 
 
-Type classes enable recursion on the structure of types, making choices based on specific subtypes. Note though that types classes are not the only way to achieve this, and we'll explore alternative solutions in section 3. 
+Type classes enable recursion on the structure of types, making choices based on specific subtypes. Note though that type classes are not the only way to achieve this, and we'll explore alternative solutions in section 3. 
 
 > Should types expose information, or instead hide unnecessary details? In the brave new world of (dependent) type-theory-based programming my choice shall be firmly the former option. Information hiding only makes sense in a dangerous world where programmers communicate intent by giving classes descriptive English names and preventing (with more or less success) breaking invariants by making methods private. `MouseEventAdapter` is in the eye of the beholder. Its meaning is hinted at by its name, and defined by the implementation. Its productive use hinges on mutual understanding of programming patterns. 
 
