@@ -506,7 +506,7 @@ With type classes, propositional equality becomes important when matching instan
 
 > **Coherent type classes must have propositionally disjoint heads.**
 
-Consider a class has two instances that are inequal definitionally, but equal propositionally:
+Consider a class which has two instances that are inequal definitionally, but equal propositionally:
 
 ```haskell
 -- not valid Haskell
