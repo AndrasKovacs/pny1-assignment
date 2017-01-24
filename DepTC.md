@@ -392,9 +392,9 @@ These come under a variety of names. They first became popular in ML, where they
 
 Coq, Agda and Lean all support such modules. Higher-order modules combined with dependent types are extremely powerful and can easily express any [*algebraic specification*](https://en.wikipedia.org/wiki/Algebraic_specification). From now on I'll call them "Agda-style modules" and provide examples in Agda since that's I'm familiar with the most (see [this page](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=ReferenceManual.Modules) for reference on Agda modules). 
 
-Agda-style modules disallow any kind of nominal ambiguity and overloading. Instead, it provides the programmer extremely fine-grained control over namespaces and makes it possible to assemble modules and namespaces on-the-fly. In Agda, it is possible to import modules inside *arbitrary expressions*, including *type annotations*, and we can declare (nested) modules even in local scope. We can also qualify, rename and hide imported names. 
+Agda-style modules forbid any kind of nominal ambiguity and overloading. Instead, they provide the programmer extremely fine-grained control over namespaces and make it possible to assemble modules and namespaces on-the-fly. In Agda, it is possible to import modules inside *arbitrary expressions*, including *type annotations*, and we can declare (nested) modules even in local scope. We can also qualify, rename and hide imported names. 
 
-Thus, the Agda standard library deliberately has many colliding names. The standard practice is to have only a small amount of top-level imports in a source file, and import locally whenever some functionality is needed. For a silly example, lists have an obvious `Monoid` implementation, and we can locally use the standard `Monoid` names, which are `∙` for the binary operation and `ε` for identity:
+Thus, the Agda standard library deliberately has many colliding names. A common practice is to have only a small amount of top-level imports in a source file, and import locally whenever some functionality is needed. For a silly example, lists have an obvious `Monoid` implementation, and we can locally use the standard `Monoid` names, which are `∙` for the binary operation and `ε` for identity:
 
 ```agda
 open import Algebra   -- contains the Monoid record declaration
@@ -484,8 +484,9 @@ _+_ : Nat -> Nat -> Nat
 0     + b = b
 suc a + b = suc (a + b)
 
+-- suppose we have (n : Nat) in context, then
 -- (n + 0) is in normal form
--- (0 + n) reduces to n
+-- but (0 + n) reduces to n
 ```
 
 Here `n + 0` and `n` are not definitionally equal. Definitional equality usually contains equality modulo alpha-beta-eta conversion; here we have beta conversion between `0 + n` and `n` since we defined addition with recursion on the first argument. `0 + n` is definitionally equal to `n` for any specific `n` numeral, but the type checker doesn't know this (and in general such equalitites are undecidable). We can rectify this issue in a dependent language by introducing types that carry evidence for equality:
