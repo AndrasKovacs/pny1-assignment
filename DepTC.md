@@ -1,5 +1,5 @@
 
-### Type classes and class coherence in the dependently typed world
+### On type classes, class coherence and dependent types 
 
 
 #### 1. Introduction
