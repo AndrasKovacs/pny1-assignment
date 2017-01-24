@@ -1,5 +1,5 @@
 
-### The future of type classes in dependently typed programming
+### Type classes and class coherence in the dependently typed world
 
 
 #### 1. Introduction
