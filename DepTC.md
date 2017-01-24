@@ -482,7 +482,7 @@ However, open terms may or may not do so:
 ```agda
 _+_ : Nat -> Nat -> Nat
 0     + b = b
-suc a + b = suc (a + b
+suc a + b = suc (a + b)
 
 -- (n + 0) is in normal form
 -- (0 + n) reduces to n
