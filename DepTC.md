@@ -673,7 +673,7 @@ Wrapping up our main points:
 - Type classes are very effective at introducing code generation and boilerplate removal in a way that is intuitive and lends itself easily to software abstraction.
 - Proposed alternatives to type classes do not demonstrably cover all of the benefits.
 - Class coherence is important in software development with shallow specification, but less so in deep formalization.
-- However, maintaining coherence gets more difficult as we switch to more expressive languages, and it becomes outright infeasible when we get to univalent type theories. 
+- Maintaining coherence gets more difficult as we switch to more expressive languages, and it becomes outright infeasible when we get to univalent type theories. 
 - Precise specification offsets fragility introduced by incoherent classes. 
 
 As to future research, I briefly mentioned in section 2.1. that *constrained search* could denote a wide range of solutions, which wouldn't necessarily be similar to type classes. For example, SMT solvers used in refinement type systems can be also viewed as a tool for constrained search. It would be interesting to try come up with radically different designs. 
