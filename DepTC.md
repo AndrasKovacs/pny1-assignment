@@ -1,5 +1,5 @@
 
-### On type classes, class coherence and dependent types 
+### Type classes, class coherence and dependent types 
 
 
 #### 1. Introduction
