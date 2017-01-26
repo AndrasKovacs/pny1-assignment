@@ -1,5 +1,7 @@
 
--- proof that decidable equality is propositional (assuming fun. ext. + axiom K)
+-- proof that decidable equality is propositional
+-- assuming fun. ext. + Axiom K, but actually this is true even without Axiom K
+-- since any type with dec. equality is a set by Hedberg's theorem (which I omit here).
 
 open import Data.Product
 open import Relation.Binary.PropositionalEquality
