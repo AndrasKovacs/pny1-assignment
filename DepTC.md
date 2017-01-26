@@ -4,7 +4,7 @@
 
 #### 1. Introduction
 
-Type classes are on the rise. Major modern programming languages such as [Scala](http://www.scala-lang.org/docu/files/ScalaReference.pdf), [Rust](https://doc.rust-lang.org/book/traits.html) and [Swift](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/Swift_Programming_Language/Protocols.html) support type class-based abstraction. Microsoft Research's new theorem prover, [Lean](https://leanprover.github.io/) was designed from ground-up with type classes in mind, and [Agda](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=ReferenceManual.InstanceArguments) and [Coq](https://coq.inria.fr/refman/Reference-Manual022.html), two existing proof assistants, have also added support. The C++17 standard will hopefully also add type classes under the name of ["Concept"](http://en.cppreference.com/w/cpp/concept)-s, after much languishing and delays. 
+Type classes are on the rise. Major modern programming languages such as [Scala](http://www.scala-lang.org/docu/files/ScalaReference.pdf), [Rust](https://doc.rust-lang.org/book/traits.html) and [Swift](https://developer.apple.com/library/ios/documentation/Swift/Conceptual/Swift_Programming_Language/Protocols.html) support type class-based abstraction. Microsoft Research's new theorem prover, [Lean](http://leanprover.github.io/documentation/) was designed from ground-up with type classes in mind, and [Agda](https://agda.readthedocs.io/en/latest/language/instance-arguments.html) and [Coq](https://coq.inria.fr/refman/Reference-Manual022.html), two existing proof assistants, have also added support. The C++17 standard will hopefully also add type classes under the name of ["Concept"](http://en.cppreference.com/w/cpp/concept)-s, after much languishing and delays. 
 
 Despite type classes' tremendous success in the Haskell ecosystem - which likely crucially influenced its adoption elsewhere - there's always been criticism. Some say that first-class modules, generic programming or dependent types obviate much the need for type classes. Also, there's yet another debate about the relative merits of coherent type classes (as featured in Haskell, Rust and [Purescript](https://leanpub.com/purescript/read#leanpub-auto-type-classes) and incoherent type classes (as featured in Scala, [Idris](http://docs.idris-lang.org/en/latest/tutorial/classes.html), Coq, and Agda). 
 
@@ -16,9 +16,9 @@ Below I discuss the merits and prospects of type classes, with focus on advanced
 
 ##### 2.1. Overview
 
-Type classes were originally introduced by [Wadler](http://homepages.inf.ed.ac.uk/wadler/topics/type-classes.html) as a principled and efficiently implementable form of ad-hoc polymorphism. I do not aim to provide an introduction to type classes in this article; I assume that the reader is already familiar with them. Instead I seek to conceptualize them in a slightly unusual way. Thus, my short definition has a different emphasis than ad-hoc polymorphism: 
+Type classes were introduced by [Wadler](http://homepages.inf.ed.ac.uk/wadler/topics/type-classes.html) as a principled and efficiently implementable form of ad-hoc polymorphism. I do not aim to provide an introduction to type classes in this article; I assume that the reader is already familiar with them. Instead I seek to conceptualize them in a slightly unusual way (without any pretense of authority). Thus, my short definition has a different emphasis than ad-hoc polymorphism: 
 
-> **Type classes are systems enabling automatic code generation through constrained search.**
+> **Type classes enable programmer-constrained proof search**
 
 What do we mean by "constrained" and "search" here, though? To illuminate this, let us first consider a general unconstrained search problem, as a simple Haskell programming task. Suppose our context has the following data and function definitions (with implementations that aren't relevant to us now):
 
@@ -37,7 +37,7 @@ h :: A B -> String
 
 A natural solution would be `h ab = g f ab`. We can arrive at the solution by searching the available definitions in the context and trying to plug them together in a way that yields the desired type. This activity is analoguous to formal proof writing as per the [Curry-Howard correspondence](https://en.wikipedia.org/wiki/Curry%E2%80%93Howard_correspondence). A large part of practical programming can be understood as a task like the above one: given a context of already implemented code, write additional code with given type and semantics. Note that our toy example is solvable purely by playing with types, but given some formal notion of semantics, "search" can encompass that as well. 
 
-Automatic search techniques do exist, but they are largely unusable for everyday programming for the following reasons:
+Automatic search techniques do exist, but they are largely unsuitable for everyday programming for the following reasons:
 
 - The necessity of painstaking formal specification of search goals. If our specification isn't precise enough, then it's not guaranteed that search results will be satisfactory. 
 - Search spaces are prohibitively large for all but the simplest problems. 
@@ -78,7 +78,7 @@ A succesful search allows the compiler to plug in the appropriate `show` definit
 
 As long as instance and class definitions are kept in a tractable form (in Haskell's case, instances are [Horn clauses](https://en.wikipedia.org/wiki/Horn_clause)), instance resolution remains a tractable problem. This constitutes a solution to the first problem, the problem of large search spaces. Practical implementations in programming languages all use some variation of type-directed resolution, but in principle search could be constrained in different ways (this is a topic that could be worthwhile to explore).
 
-As to the problem of specifications, programmers can manually implement instance methods, thereby exerting control over the semantics of generated code. Instances become the basic building blocks, and instance resolution only provides the "plumbing". Of course, this means that a significant amount of program logic is still written by hand. It's a general trade-off; depdending on the expressiveness of the ambient type system programmers may be able to increase or decrease the amount of obligations for hand-written code.
+As to the problem of specifications, programmers can manually implement instance methods, thereby exerting control over the semantics of generated code: if implementations of instances are well-behaved, then the larger chunks of code generated from them are more likely to be correct as well. Instances become the basic building blocks, and instance resolution only provides the "plumbing". Of course, this means that a significant amount of program logic is still written by hand. It's a general trade-off; in any case programmers should be able to control the amount of obligations for hand-written code. 
 
 ##### 2.2. Advantages of type classes
 
@@ -127,9 +127,7 @@ But this largely defeats the purpose, since now `Pair` itself is restricted to `
 
 Type classes enable recursion on the structure of types, making choices based on specific subtypes. Note though that type classes are not the only way to achieve this, and we'll explore alternative solutions in section 3. 
 
-> Should types expose information, or instead hide unnecessary details? In the brave new world of (dependent) type-theory-based programming my choice shall be firmly the former option. Information hiding only makes sense in a dangerous world where programmers communicate intent by giving classes descriptive English names and preventing (with more or less success) breaking invariants by making methods private. `MouseEventAdapter` is in the eye of the beholder. Its meaning is hinted at by its name, and defined by the implementation. Its productive use hinges on mutual understanding of programming patterns. 
-
-> But if types carry more information, they can be more useful, and we can also prove and enforce more properties. `Pair` is more informative than `PairOfInt`, and in turn [least fixed points of functors](https://en.wikipedia.org/wiki/Initial_algebra) are more informative than plain recursive data types. In the brave new world, we could have analogues of `MouseEventAdapter` types that encode their meaning in their structure, and invariants could be preserved by making illegal states unrepresentable. In that world, the name `MousEventAdapter` could be still useful as a shorthand, and we could still present lean API-s, but there wouldn't be nearly as much reason to hide details. After all, those with a clean record shouldn't have anything to fear.
+> Should types expose information, or instead hide unnecessary details? In OOP, a prime motivation for hiding things is that invariants are not specifiable and not enforcable, therefore it makes sense to at least discourage programmers and third-party code from breaking things. In dependent type theory, we have ample ability to specify and enforce. However, hiding information still has important consequences. Opaque types enable *parametricity* and various forms of extensionality. Transparent types enable generic programming and metaprogramming. It's probably best to have opaque and parametric types in the ambient theory, but also have the ability to internally define transparent codes of sub-universes of types (which isn't surprising or new, since all popular dependent languages espouse this philosophy).
 
 On another note, type classes also have a favorable weight-to-power ratio in terms of runtime performance. The Rust programming language extensively uses type classes, but without any runtime cost, since the relatively simple Rust type system (no higher-rank polymorphism, no polymorphic values inside data types) allows compile-time specialization and inlining of all instances. Inlining and specialization can cause excessive code size though, which should be considered as a trade-off, but type classes give compilers considerable freedom to specialize where they see benefit to it. This compares favorably to OOP polymorphism, where devirtualization can't be performed as robustly or universally, or it requires runtime JIT assistance, as in the case of Java. In general, more information in static types helps code optimization as well. 
 
@@ -141,14 +139,14 @@ Let's start off by defining coherence:
 
 > **An implementation of type classes is coherent if all instances with equal types are equal.**
 
-Let's provide some background exaplanation. Runtime instances are just records of values and functions, similar to virtual tables in C++ (provided that there are instances that persist runtime after specialization and static dispatch). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
+Let's provide some background exaplanation. Runtime instances are just records of values and functions, similar to virtual tables in C++ (provided that there are instances that persist runtime after specialization). Instances are passed around as implicit arguments, and in some languages they can be also stored in runtime containers. In Haskell, a class constraint is dynamically equivalent to an extra function argument:
 
 ```haskell
 f :: Eq a => a -> a -> a -> a
 f a b default = if a == b then a else default
 ```
 
-This is desuraged roughly into the following code in GHC's internal representation:
+This is desugared roughly into the following code in GHC's internal representation:
 
 ```haskell
 f :: Eq a -> a -> a -> a -> a
@@ -186,7 +184,7 @@ Coherence significantly enhances robustness. It implies that all the following f
 - Visibility modifiers on module imports and exports
 - The order of class constraints in classes, instances and definitions
 
-Coherent classes also have the "diamond" property (see e. g. [Edward Kmett](https://www.youtube.com/watch?v=hIZxTQP1ifo)), namely that there could be multiple derivations of *constraint entailment*, but all derivations result in the same instance:
+Coherence implies the "diamond" property (see e. g. [Edward Kmett](https://www.youtube.com/watch?v=hIZxTQP1ifo)), namely that there could be multiple derivations of *constraint entailment*, but all derivations yield in the same instance:
 
 
 ```
@@ -204,12 +202,12 @@ In the above diagram, we have `class Eq a => Ord`, `instance Eq a => Eq (List a)
 
 The first derivation takes the left path, using the `Ord` superclass to get to `Eq a`, then the `List` `Eq` instances. The right derivation first follows the `Ord (List a)` instance and follows the `Ord` superclass thereafter. 
 
-Of course, coherence already implies that all derivations must agree. The diamond property is interesting because it illustrates that coherent systems can hide the details of resolution algorithms from programmers. Incoherent systems should also behave in a well-defined and sensible way, but they must necessarily expose the resolution procedure so that programmers can anticipate its effects. 
+This illustrates that coherent systems can hide the details of resolution algorithms from programmers. Incoherent systems should also behave in a well-defined and sensible way, but they must necessarily expose the resolution procedure so that programmers can anticipate its effects. 
 
-What makes coherent type classes such? Certainly, we should expect that strong guarantees are realized through restrictions, which is the case here:
+What makes coherent type classes such? Certainly, we should expect that it's realized through some restrictions. I'm not fully sure about the exact requirements of coherence, and I'm not aware of any project that attempted to *prove* coherence instead of just assuming it as a design goal and weeding out incoherences when they crop up. With this in mind, I list the following:
 
-- All instances must be defined in instance declarations and cannot be passed around explicitly. Such explicit passing obviously contradicts coherence, since it allows creating instances from arbitrary values. 
-- The instance heads of a class must be disjoint and non-overlapping, provided that we allow modularity, i. e. different sets of instances visible in different modules. If we allow both modularity and overlapping then it could be the case that a module defines a more specific overlapping instance than another module, and thus two different runtime instances may end up in the program. On the other hand, overlapping instances could be made coherent if we give up modularity, i. e. mandate a single globally consistent set of instances, but this option isn't practical in any realistic module system. 
+- All instances must be defined in instance declarations and cannot be passed around explicitly.
+- The instance heads of a class must be disjoint and non-overlapping, provided that we allow modularity, i. e. different sets of instances visible in different modules. If we allow both modularity and overlapping then it could be the case that a module defines a more specific overlapping instance than another module, and thus two different runtime instances may end up in the program. On the other hand, overlapping instances could be made coherent if we give up modularity, i. e. mandate a single globally consistent set of instances. I'm not sure about the practicality of this in realistic module systems.
 - There must be no "orphan instances", i. e. instances such that their classes aren't declared in the module of the instance, and the types in their heads aren't defined in the module either. In the presence of orphan instances we could just define two different orphan instances in different modules, then export them wrapped in a runtime box, to be used in a single module - destroying coherence.
 
 Backtracking instance resolution is also incompatible with coherence and modularity. Disjoint instance heads eliminate non-determinism in instance matching, so the only remaining point for backtracking choice would be instance constraints. In pseudo-Haskell:
@@ -290,6 +288,8 @@ instance Num a => Monoid (Product a) where
 `Sum a` and `Product a` are types that differ from the underlying `a`-s, although they have the same runtime representation. They allow us to define to different `Monoid` instances. Their drawback is that we must use the `Plus` and `Product` constructors to wrap and unwrap values. This can be annoying, so Haskell [has a mechanism](https://www.cis.upenn.edu/~eir/papers/2014/coercible/coercible.pdf) for safely coercing values between representationally equal types:
 
 ```haskell
+import Data.Coerce
+
 foo :: List Product
 foo = map Product [0..10]
 
@@ -305,7 +305,7 @@ The main drawbacks of incoherence are:
 
 > **1. Complexity of instance resolution, fragile semantics with respect to small program transformations**
 
-Naturally, the lack of coherence's robustness manifests itself as fragility, for example as a Scala program that breaks after someone alphabetizes the package imports. 
+As a vidid example, I recall people on Twitter complaining about Scala programs breaking after alphabetizing imports.
 
 > **2. Some uses cases ruled out by lack of coherence**
 
@@ -328,7 +328,7 @@ I posit that coherence has significant benefits in robustness and scalability, a
 
 Still, there are many caveats and footnotes to this. 
 
-First, coherence and incoherence are a convenient and simple categorization of real-world systems, but there are many features and details that determine type classes' usability in the context of a given language. There's a great variance in the methods for incoherent search. The [`IncoherentInstances`](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/type-class-extensions.html#instance-overlap) extension of GHC Haskell is rather simple, Agda's instance search is more complex, Coq also features backtracking, while Scala's search doesn't have backtracking but is very complex partly because it's embedded in a complex language. It might be the case that some real-world systems benefit from incoherence and never suffer from their drawbacks, or there may be some sweet spot of search complexity that balances robustness and flexibility, and it isn't necessarily coherent search. 
+First, coherence and incoherence are a convenient and simple categorization of real-world systems, but there are many features and details that determine type classes' usability in the context of a given language. There's a great variance in the methods for incoherent search. The [`IncoherentInstances`](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/type-class-extensions.html#instance-overlap) extension of GHC Haskell is rather simple, Agda's instance search is more complex, Coq also features backtracking, while Scala's search doesn't have backtracking but is very complex partly because it's embedded in a complex language. Real-world systems may have sweet spots of search with some balance of robustness and flexibility, which may not necessarily be coherent.
 
 > This connects to the general issue of software methodology and productivity research, which hasn't delivered specatular results so far (that I know of). In particular, there is a large amount of quantitative research that could be potentially done to inform programming language design. Such reasearch would be preferable to the status quo of language design which mostly builds upon accumulated subjective experience of programmers and public discussion (where the most vociferous participants may or may not emphasize the practicaly most important points).
 
@@ -342,15 +342,17 @@ However, we would like to ultimately integrate software development and proof wr
 
 #### 3. Alternatives to type classes
 
-In this section I examine whether some features and techniques could make type classes superfluous. I single out features such that I have in the past encountered people characterizing them as alternatives to classes (though I'm afraid I cannot provide specific references to such discussions). 
+In this section I examine whether some features and techniques could make type classes superfluous. I single out features such that I have in the past seen people characterizing them as alternatives to classes.
 
 ##### 3.1. Generic programming
 
 By "generic programming" I mean programming with closed type universes, which includes solutions such as ["Scrap Your Boilerplate"](https://hackage.haskell.org/package/syb) and [GHC.Generics](https://hackage.haskell.org/package/base-4.8.1.0/docs/GHC-Generics.html) in Haskell and direct uses of type universes in dependent languages (see e. g. [McBride](https://www.cs.ox.ac.uk/projects/utgp/school/conor.pdf)).
 
-The general idea is that we have *descriptions* or *codes* for datatypes inside the language, and we can use descriptions to guide computation on values of described types. Type universes are data types whose values are descriptions (although full-fledged universes require dependent typing).
+Inspection of structures of types is also at the heart of type class resolution, but while in classic type class usage the emphasis is on ad-hoc extensibility, generic programming relies more on guiding computation by the structure of types. For example, in Haskell, `Functor` or `Monad` have many instances on types that are essentially unrelated to each other, as far as we internally know. In contrast, generic pretty printing or equality operate by recursing on type structure. 
 
-What makes type universes different from regular user-defined types in Haskell or Agda is that they have a *closed collection of production rules* but are *open for inspection*. Regular user-defined data types are more like axioms to the system, and yield opaque types with hidden structure. If we define natural numbers as
+Another important point is that generic programming is very much possible without any support for type classes. We only need functions that compute types from data (i. e. "large elimination"), which is naturally available in dependent languages. In Haskell using classes for generics is necessary because of the lack of convenient large elimination.
+
+As an example, if we define natural numbers as
 
 ```haskell
 data Nat = Zero | Succ Nat
@@ -370,9 +372,9 @@ Nat = one + rec
 ```
 The `Nat` description can be now interpreted as a polynomial functor in Agda (and we can take its fixpoint), and use that in lieu of the old `Nat`, but now the structure of the type is available for inspection. 
 
-For the sake of brevity I shall omit more Agda code here. The rest of my example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* described types. For example, we can implement [generic equality](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda#L72), pretty printing, serialization, zippers, lenses and more. In more advanced (dependent) languages we can define subsets of a larger universe using type-theoretic predicates, and define generic functions that work only on some subsets; for example generic equality that only works on types that doesn't contain function fields. 
+For the sake of brevity I shall omit more Agda code here. The rest of my example can be [found here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda). The key point is that by having an internal description of types, we can define generic operations that work on values of *all* described types. For example, we can implement [generic equality](https://github.com/AndrasKovacs/pny1-assignment/blob/master/SimpleGenerics.agda#L72), pretty printing, serialization, zippers, lenses and more. In more advanced languages we can define subsets of a larger universe using predicates, and define generic functions that work only on some sub-universes; for example a generic equality which only works on types that don't contain function fields. 
 
-In practical implementations of generic programming in Haskell, [Clean](http://clean.cs.ru.nl/download/html_report/CleanRep.2.2_9.htm#_Toc311798067) or [Purescript](http://pursuit.purescript.org/packages/purescript-generics/0.7.0), generic functions are used via an extra conversion from user-defined types to generic representations and back. This has some performance overhead, and generic representations also tend to have greater memory footprint. Nevertheless, optimized generics are possible, as are languages that have generic types by default, or have [*all* types](http://www.ioc.ee/~james/papers/levitation.pdf) in generic form.
+In practical implementations of generic programming in Haskell, [Clean](http://clean.cs.ru.nl/download/html_report/CleanRep.2.2_9.htm#_Toc311798067) or [Purescript](https://pursuit.purescript.org/packages/purescript-generics/), generic functions are used via an extra conversion from user-defined types to generic representations and back. This has some performance overhead, and generic representations also tend to have greater memory footprint. Nevertheless, optimized generics are possible (and AFAIK quite easy to implement with partial evaluation) as are languages that have generic types by default, or have [*all* types](http://www.ioc.ee/~james/papers/levitation.pdf) in generic form.
 
 Turning back to type classes, can we expect that generic programming can replace them? 
 
@@ -380,7 +382,7 @@ The answer is likely no. Generic programming does overlap with type classes, and
 
 Also, despite our best intentions a large amount of meaning and intent is expressed by the *naming* of types. Programmers often use isomorphic but differently named types, because most of the time there's no need or energy to express all relevant semantics in types. Thus, generics may be good for serialization, but not quite good for pretty printing, since generic functions don't know much about the context in which a type is used or the intent of the programmer. It's a common point of pain in programming languages that support some form of printing for all types: the printed outputs tend to be messy, verbose or uninformative. 
 
-But I must stress that there is a considerable amount of research on dependently typed generic programming that enables extremely powerful abstractions (mind-blowing is an appropriate term). For example, see Conor McBride's work on [ornaments](https://personal.cis.strath.ac.uk/conor.mcbride/pub/OAAO/LitOrn.pdf), which are descriptions of *annotations*, *modifications* and *information erasure* on types. Ornaments describe notions such as "lists are natural numbers annotated with fields of some type" and "the erasure of fields from lists yields a natural number which is the length of the list", and they also enable some automatic lifting of functions operating on a type to a modified version of that type. Generics also tend to synergize with type classes: in Haskell, a less expressive language, type classes are even required for defining generic functions, since they're the main mechanism for dispatching on types. 
+But I must stress that there is a considerable amount of research on dependently typed generic programming that enables extremely powerful abstractions (mind-blowing is an appropriate term). For example, see Conor McBride's work on [ornaments](https://personal.cis.strath.ac.uk/conor.mcbride/pub/OAAO/LitOrn.pdf), which are descriptions of *annotations*, *modifications* and *information erasure* on types. Ornaments describe notions such as "lists are natural numbers annotated with fields of some type" and "the erasure of fields from lists yields a natural number which is the length of the list", and they also enable some automatic lifting of functions operating on a type to a modified version of that type. 
 
 ##### 3.2. Higher-order modules
 
@@ -389,6 +391,8 @@ These come under a variety of names. They first became popular in ML, where they
 - Modules can be parametrized by values, types and other modules, and can be applied to parameters like functions.
 - Modules support existential (abstract) types, or more generally, existential quantification.
 - Modules form namespaces that can be nested, and name visibility can be flexibly controlled.
+
+More succinctly, first-class modules are (dependent) functions returning records with namespaces.
 
 Coq, Agda and Lean all support such modules. Higher-order modules combined with dependent types are extremely powerful and can easily express any [*algebraic specification*](https://en.wikipedia.org/wiki/Algebraic_specification). From now on I'll call them "Agda-style modules" and provide examples in Agda since that's I'm familiar with the most (see [this page](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=ReferenceManual.Modules) for reference on Agda modules). 
 
@@ -505,7 +509,7 @@ Now we can write a function with type `(n : Nat) -> n + 0 ≡ n` ([see proof](ht
 
 With type classes, propositional equality becomes important when matching instance heads. Recall from section 2.4 that coherent type classes must have disjoint instance heads. We refine this to the following:
 
-> **Coherent type classes must have propositionally disjoint heads.**
+> **Coherent type classes must have heads which aren't propositionally equal**
 
 Consider a class which has two instances that are inequal definitionally, but equal propositionally:
 
@@ -516,7 +520,9 @@ instance Foo (n + 0) where foo = "A"
 instance Foo n       where foo = "B"
 ```
 
-In an open context with `n :: Nat`, instance resolution may give us a dictionary with type `Foo (n + 0)`, but we can coerce that to `Foo n` using the proof that `(n + 0) :~: n`. The coerced dictionary is inequal to the dictionary resulting from resolving `Foo n`. For this reason, Haskell prohibits type families (which are like functions on the type level) in instance heads. 
+In an open context with `n :: Nat`, instance resolution may give us a dictionary with type `Foo (n + 0)`, but we can coerce that to `Foo n` using the proof that `(n + 0) :~: n`. The coerced dictionary is inequal to the dictionary resulting from resolving `Foo n`. For this reason, Haskell prohibits type families (which are like functions on the type level) in instance heads.
+
+Note that we don't need instance heads to be *propositionally inequal*, we only need their equality to be internally unprovable. For example, in Agda and Martin-Löf type theory, propositional equality of `Bool` and `Fin 2` (the two-element finite type) can't be proven *or disproven*, but this is enough for class coherence.
 
 ##### 4.2. Preserving coherence
 
@@ -524,7 +530,7 @@ In general, one can preserve coherence by restricting instance heads to a langua
 
 **First**, if our language doesn't have [function extensionality](https://ncatlab.org/nlab/show/function+extensionality), then we have considerable amount leeway to use functions, since in this case definitional equality of functions coincides with propositional equality. The only expressions with undecidable propositional equality are *open expressions with non-function types containing function applications*. 
 
-For example, if `f` and `g` are top level functions, then `f` and `g` are OK in instance heads. `f x` is also OK if `f x` still has a function type (it's an unsaturated application) and `x` is OK as an expression. On the other hand, `n + 0` is not OK, since it has a value type (`Nat`), and it contains a function application. 
+For example, if `f` and `g` are top-level functions with different implementation, then `f` and `g` are OK in instance heads, since they can't be proven equal. `f x` is also OK if `f x` still has a function type (it's an unsaturated application) and `x` is OK as an expression. In general, open expressions with function types are OK, since they are only propositionally equal to themselves. On the other hand, `n + 0` is not OK, since it has a value type (`Nat`), and it contains a function application.
 
 Restricting instance heads in this manner seems a good compromise. From the top of my head, I can't think of a useful type that would be exiled from classes. We lose one use case though, namely reflection of open expressions, which can be convenient for automatic solvers. 
 
@@ -534,15 +540,13 @@ Fortunately, there is already native reflection support for such solvers in [Coq
 
 **Second**, we can require proofs of propositional disjointness from programmers. In other words, the compiler tries to prove disjointness of instances by some incomplete procedure, and demands a proof from the programmer if it gets stuck. 
 
-This may seem a bit intrusive. It's also anti-modular in the sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially considering that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick with the previous solution in this section and restrict the instance heads?
-
-However, as we move up to type theories with more sophisticated equality, this option could become more viable.
+This may seem a bit intrusive. It's also anti-modular in the sense that programmers would have to add or remove proofs to their instance definitions depending on other instances in scope, which may come from imported modules (even transitively!). However, given a sufficiently smart compiler, the amount of proof obligations could turn out to be pretty low, especially considering that useful instances rarely have undecidable equality, as we've seen. But then we might ask whether it pays off to support this mechanism - why not just stick with the previous solution in this section and restrict the instance heads? As we'll see in the next section, requiring disjointness proofs becomes more viable if we have more extensional equality.
 
 ##### 4.3. Adding extensionality
 
-An obvious power-up would be adding function extensionality. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensional type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf), and univalent type theories also have function extensionality (see on [page 144](http://saunders.phil.cmu.edu/book/hott-online.pdf)). We'll discuss univalence later in more detail.
+First, we consider function extensionality. It means that we can prove equalty of functions by proving that they agree on all inputs. This is relatively realistic in a future language, since [NuPRL](http://www.nuprl.org/) already has it, and even in intensional type theories one can find potential solutions, such as [Observational Type Theory](http://www.cs.nott.ac.uk/~psztxa/publ/obseqnow.pdf). Type theories with univalence also have function extensionality (see on [page 144](http://saunders.phil.cmu.edu/book/hott-online.pdf)). We'll discuss univalence later in more detail.
 
-Now, functions can *never* appear in instance heads, simply because any function can be proven equal to another by extensionality. This is a rather serious limitation, and it makes it all the more appealing to require proofs of disjointness. 
+Now, functions can *never* appear in instance heads, simply because any function can be proven equal to another by extensionality. This would be a rather serious limitation, which makes it appealing to instead require proofs of disjointness. 
 
 There are other forms of extensionality. If our language supports codata and coinduction, then it could as well support extensionality for codata. In languages without such extensionality, values of codata are equal if they are definitionallly equal. For example, an infinite stream of repeated numbers is definitionally equal only to itself, but it's observationally equal to any suffix of itself. 
 
@@ -622,15 +626,13 @@ For a while it's been an open problem whether it's possible at all to implement 
 
 It's hard to overstate the sheer power of univalence. 
 
-As an example, suppose that we implement unary natural numbers and the usual arithemtic operations. We also define binary numbers as an inductive type. Now, if we prove equivalence of the two representations, from any function that operates on unary numbers, we automatically get a new function operating on binary numbers such that *it preserves all semantic properties* of the original function, translated to the new representation. 
+As an example, suppose that we implement unary natural numbers and the usual arithemtic operations. We also define binary numbers as an inductive type. Now, if we prove equivalence of the two representations, from any function that operates on unary numbers, we automatically get a new function operating on binary numbers such that *it preserves all internally expressible properties* of the original function, translated to the new representation. 
 
 In a sense, univalence is the ultimate constructive demonstration of subsitutability of equals: it lets us substitute equivalent types in any context, and spits out new proofs (implementations) automatically. 
 
 Needless to say, univalence greatly interferes with type class coherence.
 
-The whole notion of `newtype` as it's in Haskell is futile now. Since newtypes introduce isomorphic types, they also introduce equal types here. Any type with a countably infinite number of elements is now equal to natural numbers - so we can't define different instances for them. We can't define different `Show` instances for `BinaryTree Nat` and `List Nat`. Generally, with any definition we define a whole equivalence class of types, of which our defined type is a representative.
-
-Before in section 2.2 I talked chidingly about types whose intended meaning is encoded in their names, instead promoting types that encode meaning in their structure. Univalence takes this ethos to its logical conclusion, stripping type definitions of all surface qualities and going right to their abstract core, but in the process it also reduces our ability to dress up equal things differently.
+The whole notion of `newtype` as it's in Haskell is futile now. Since newtypes introduce isomorphic types, they also introduce equal types here. Any type with a countably infinite number of elements is now equal to natural numbers - so we can't define different instances for them. We can't define different `Show` instances for `BinaryTree Nat` and `List Nat`. Generally, any type definition actually defines an equivalence class of types.
 
 #### 5. Taming incoherent classes
 
@@ -646,7 +648,7 @@ Actually, quite a few. Often, if we pin down the properties of a class precisely
 
 A classic example is decidable equality. While regular `A -> A -> Bool` equality admits many implementations, decidable equality with type `(x y : A) → (x ≡ y) ∨ ((x ≡ y) → ⊥)` has an extensionally unique implementation ([see my proof here](https://github.com/AndrasKovacs/pny1-assignment/blob/master/DecEqProp.agda)). This means that we can have a `DecEq` class, and recover simple Boolean equality from decidable equality, or we could have both equalities as methods, and require a proof (a third method) that they agree with each other. 
 
-What about specialized equalities? In Haskell, people sometimes use `newtype` wrappers to provide alternative instances for common classes. For example we could have a syntax tree with labels and other metadata that we would like to ignore when computing equality. With decidable equality, we can't implement "forgetful" alternative instances, right? Well, we can, if we use some homotopy-flavored type theory with [higher inductive types](https://ncatlab.org/nlab/show/higher+inductive+type). Higher induction allows us to specify *equality* constructors for data types, along with the old constructors for values. For example, a HIT wrapper that "forgets" the first field of a tuple could be the following:
+What about specialized equalities? In Haskell, people sometimes use `newtype` wrappers to provide alternative instances for common classes. For example we could have a syntax tree with labels and other metadata that we would like to ignore when computing equality. With decidable equality, we can't implement "forgetful" alternative instances, right? Well, we can, if we use a type theory with [higher inductive types](https://ncatlab.org/nlab/show/higher+inductive+type). Higher induction allows us to specify *equality* constructors for data types, along with the old constructors for values. For example, a HIT wrapper that "forgets" the first field of a tuple could be the following:
 
 ```agda
 data SquashFst (A B : Set) : Set where
