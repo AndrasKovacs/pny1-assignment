@@ -394,7 +394,7 @@ These come under a variety of names. They first became popular in ML, where they
 
 More succinctly, first-class modules are (dependent) functions returning records with namespaces.
 
-Coq, Agda and Lean all support such modules. Higher-order modules combined with dependent types are extremely powerful and can easily express any [*algebraic specification*](https://en.wikipedia.org/wiki/Algebraic_specification). From now on I'll call them "Agda-style modules" and provide examples in Agda since that's I'm familiar with the most (see [this page](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=ReferenceManual.Modules) for reference on Agda modules). 
+Coq, Agda and Lean all support such modules. Higher-order modules combined with dependent types are very powerful and can easily express any [*algebraic specification*](https://en.wikipedia.org/wiki/Algebraic_specification). From now on I'll call them "Agda-style modules" and provide examples in Agda since that's I'm familiar with the most (see [this page](http://wiki.portal.chalmers.se/agda/pmwiki.php?n=ReferenceManual.Modules) for reference on Agda modules). 
 
 Agda-style modules forbid any kind of nominal ambiguity and overloading. Instead, they provide the programmer extremely fine-grained control over namespaces and make it possible to assemble modules and namespaces on-the-fly. In Agda, it is possible to import modules inside *arbitrary expressions*, including *type annotations*, and we can declare (nested) modules even in local scope. We can also qualify, rename and hide imported names. 
 
