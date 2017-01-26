@@ -671,7 +671,7 @@ Some types are propositional, but can't be easily proven so, because the proofs 
 Wrapping up our main points:
 
 - Type classes are very effective at introducing code generation and boilerplate removal in a way that is intuitive and lends itself easily to software abstraction.
-- Proposed alternatives to type classes fall short of providing the same set of benefits. 
+- Proposed alternatives to type classes do not demonstrably cover all of the benefits.
 - Class coherence is important, especially in the context of software development.
 - However, maintaining coherence gets more difficult as we switch to more expressive languages, and it becomes outright infeasible when we get to univalent type theories. 
 - Precise specification offsets fragility introduced by incoherent classes. 
