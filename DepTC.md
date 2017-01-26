@@ -342,7 +342,7 @@ However, we would like to ultimately integrate software development and proof wr
 
 #### 3. Alternatives to type classes
 
-In this section I examine whether some features and techniques could make type classes superfluous. I single out features such that I have in the past seen people characterizing them as alternatives to classes.
+In this section I examine whether some features and techniques could make type classes superfluous. I single out features that I have previously seen being characterized as alternatives to type classes.
 
 ##### 3.1. Generic programming
 
