@@ -672,7 +672,7 @@ Wrapping up our main points:
 
 - Type classes are very effective at introducing code generation and boilerplate removal in a way that is intuitive and lends itself easily to software abstraction.
 - Proposed alternatives to type classes do not demonstrably cover all of the benefits.
-- Class coherence is important, especially in the context of software development.
+- Class coherence is important in software development with shallow specification, but less so in deep formalization.
 - However, maintaining coherence gets more difficult as we switch to more expressive languages, and it becomes outright infeasible when we get to univalent type theories. 
 - Precise specification offsets fragility introduced by incoherent classes. 
 
