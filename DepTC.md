@@ -348,9 +348,9 @@ In this section I examine whether some features and techniques could make type c
 
 By "generic programming" I mean programming with closed type universes, which includes solutions such as ["Scrap Your Boilerplate"](https://hackage.haskell.org/package/syb) and [GHC.Generics](https://hackage.haskell.org/package/base-4.8.1.0/docs/GHC-Generics.html) in Haskell and direct uses of type universes in dependent languages (see e. g. [McBride](https://www.cs.ox.ac.uk/projects/utgp/school/conor.pdf)).
 
-Inspection of structures of types is also at the heart of type class resolution, but while in classic type class usage the emphasis is on ad-hoc extensibility, generic programming relies more on guiding computation by the structure of types. For example, in Haskell, `Functor` or `Monad` have many instances on types that are essentially unrelated to each other, as far as we internally know. In contrast, generic pretty printing or equality operate by recursing on type structure. 
+Inspection of structures of types is at the core of both generic programming and type classes, but while in classic type class usage the emphasis is on ad-hoc extensibility, generic programming relies more on guiding computation by the structure of types. For example, in Haskell, `Functor` or `Monad` have many instances on types that are essentially unrelated to each other, as far as we internally know. In contrast, generic pretty printing or equality operate by recursing on type structure. 
 
-Another important point is that generic programming is very much possible without any support for type classes. We only need functions that compute types from data (i. e. "large elimination"), which is naturally available in dependent languages. In Haskell using classes for generics is necessary because of the lack of convenient large elimination.
+Another important point is that generic programming is very much possible without any support for type classes. We only need functions that compute types from data (i. e. "large elimination"), which is naturally available in dependent languages. In Haskell using type classes for generics is necessary because of the lack of convenient large elimination.
 
 As an example, if we define natural numbers as
 
