@@ -184,7 +184,7 @@ Coherence significantly enhances robustness. It implies that all the following f
 - Visibility modifiers on module imports and exports
 - The order of class constraints in classes, instances and definitions
 
-Coherence implies the "diamond" property (see e. g. [Edward Kmett](https://www.youtube.com/watch?v=hIZxTQP1ifo)), namely that there could be multiple derivations of *constraint entailment*, but all derivations yield in the same instance:
+Coherence implies the "diamond" property (see e. g. [Edward Kmett](https://www.youtube.com/watch?v=hIZxTQP1ifo)), namely that there could be multiple derivations of constraint entailment, but all derivations yield the same instance:
 
 
 ```
