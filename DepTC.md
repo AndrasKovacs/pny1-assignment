@@ -305,7 +305,7 @@ The main drawbacks of incoherence are:
 
 > **1. Complexity of instance resolution, fragile semantics with respect to small program transformations**
 
-As a vidid example, I recall people on Twitter complaining about Scala programs breaking after alphabetizing imports.
+As a vivid example, I recall people on Twitter complaining about Scala programs breaking after alphabetizing imports.
 
 > **2. Some uses cases ruled out by lack of coherence**
 
